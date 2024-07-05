@@ -2,7 +2,7 @@
 ### Czego ma mnie nauczyć ten projekt?
 - Obsługa baz danych w Javie
 - Poszerzenie wiedzy o elementach Biblioteki Swing
-
+- Refaktoryzacja kodu
 ### Co ma zawierać projekt?
 Zrobić aplikację okienkową, która pozwoli na:
 - [x] Wpisywanie nazwy gracza i zapisanie go do bazy danych jeśli jeszcze w niej nie jest
