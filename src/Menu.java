@@ -22,8 +22,9 @@ public class Menu extends JMenuBar {
         sortujWyniki.add(sortujASC);
         sortujWyniki.add(sortujDESC);
 
-        List<String> listaKolumn;
-        listaKolumn = BazaDanych.getBazaDanych().getListaKolumn();
+        InformacjeOTabeli informacjeOTabeli = BazaDanych.getBazaDanych().getInformacjeOTabeli();
+
+        List<String> listaKolumn = informacjeOTabeli.getInformacjaOKolumnie(InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY);
         for(String nazwaKolumny: listaKolumn){
             JMenuItem przyciskKolumnyASC = new JMenuItem(nazwaKolumny);
             przyciskKolumnyASC.addActionListener(e -> {

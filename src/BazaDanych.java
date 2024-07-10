@@ -8,16 +8,21 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class BazaDanych {
+    private final String NAZWA_BAZY = "bazatestowa";
+    private final String NAZWA_UZYTKOWNIKA = "root";
+    private final String HASLO_UZYTKOWNIKA = "TestowanieSQL1";
+
+
     private static BazaDanych bazaDanych;
     private List<Row> dane = new LinkedList<>();
     private java.sql.Connection connection;
-    final String NAZWA_BAZY = "bazatestowa";
-    private List<String> listaKolumn;
+
+    private InformacjeOTabeli informacjeOTabeli;
     private BazaDanych(){
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             //Klasa Connection odpowiada za polaczenie z baza danych
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/"+NAZWA_BAZY, "root", "TestowanieSQL1");
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/"+NAZWA_BAZY, NAZWA_UZYTKOWNIKA, HASLO_UZYTKOWNIKA);
             zaktualizujBaze();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -32,7 +37,7 @@ public class BazaDanych {
         try {
             statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT * FROM USERS");
-            zaktualizujNazwyKolumn();
+            informacjeOTabeli = new InformacjeOTabeli(connection);
             while(resultSet.next()){
                 dane.add(new Row(resultSet.getInt("idusers"),resultSet.getString("nazwa")));
             }
@@ -93,25 +98,7 @@ public class BazaDanych {
         zaktualizujBaze();
     }
 
-    public void zaktualizujNazwyKolumn() throws SQLException {
-        listaKolumn = new LinkedList<>();
-        Statement statement = null;
-        try{
-            statement = connection.createStatement();
-            String getNazwyKolumnQuery="SELECT COLUMN_NAME " +
-                    "FROM information_schema.COLUMNS " +
-                    "WHERE TABLE_NAME = 'users' AND TABLE_SCHEMA = DATABASE();";
-            ResultSet resultSet= statement.executeQuery(getNazwyKolumnQuery);
-            while(resultSet.next()){
-                listaKolumn.add(resultSet.getString("COLUMN_NAME"));
-            }
-        }catch(SQLException _){
 
-        }finally {
-            assert statement!=null;
-            statement.close();
-        }
-    }
 
     public void sortujDane(String by, String order) throws SQLException {
         Statement statement = null;
@@ -134,12 +121,15 @@ public class BazaDanych {
     }
 
     public void zaktualizujID(){
+
         Statement statement = null;
         try{
+            zaktualizujBaze();
             statement = connection.createStatement();
+            String kluczGlowny = informacjeOTabeli.getKluczGlowny();
             for(int nr=1;nr<getDane().size()+1;nr++){
                 if(nr!=getDane().get(nr-1).getId()){
-                    String updateIDQuery="UPDATE USERS SET idusers = "+nr+" WHERE idusers = "+getDane().get(nr-1).getId()+";";
+                    String updateIDQuery="UPDATE USERS SET "+kluczGlowny+" = "+nr+" WHERE "+kluczGlowny+" = "+getDane().get(nr-1).getId()+";";
                     statement.execute(updateIDQuery);
                 }
             }
@@ -170,9 +160,11 @@ public class BazaDanych {
         return bazaDanych;
     }
 
-    public List<String> getListaKolumn(){
-        return listaKolumn;
+    public InformacjeOTabeli getInformacjeOTabeli(){
+        return informacjeOTabeli;
     }
+
+
 
     class Row{
         private int id;
