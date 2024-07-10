@@ -12,6 +12,7 @@ public class BazaDanych {
     private List<Row> dane = new LinkedList<>();
     private java.sql.Connection connection;
     final String NAZWA_BAZY = "bazatestowa";
+    private List<String> listaKolumn;
     private BazaDanych(){
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -31,6 +32,7 @@ public class BazaDanych {
         try {
             statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT * FROM USERS");
+            zaktualizujNazwyKolumn();
             while(resultSet.next()){
                 dane.add(new Row(resultSet.getInt("idusers"),resultSet.getString("nazwa")));
             }
@@ -91,8 +93,8 @@ public class BazaDanych {
         zaktualizujBaze();
     }
 
-    public LinkedList<String> getNazwyKolumn() throws SQLException {
-        LinkedList<String> listaKolumn = new LinkedList<>();
+    public void zaktualizujNazwyKolumn() throws SQLException {
+        listaKolumn = new LinkedList<>();
         Statement statement = null;
         try{
             statement = connection.createStatement();
@@ -103,13 +105,12 @@ public class BazaDanych {
             while(resultSet.next()){
                 listaKolumn.add(resultSet.getString("COLUMN_NAME"));
             }
-        }catch(SQLException ex){
-            return null;
+        }catch(SQLException _){
+
         }finally {
             assert statement!=null;
             statement.close();
         }
-        return listaKolumn;
     }
 
     public void sortujDane(String by, String order) throws SQLException {
@@ -167,6 +168,10 @@ public class BazaDanych {
             bazaDanych=new BazaDanych();
         }
         return bazaDanych;
+    }
+
+    public List<String> getListaKolumn(){
+        return listaKolumn;
     }
 
     class Row{
