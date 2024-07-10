@@ -20,7 +20,14 @@ public class PanelElementow extends JScrollPane{
     }
 
     private void utworzElementy() {
-        model.setDataVector(BazaDanych.getBazaDanych().getData(), new String[]{"id", "nazwa"});
+        int liczbaKolumn = BazaDanych.getBazaDanych().getInformacjeOTabeli().getLiczbaKolumn();
+        String nazwyKolumn[] = new String[liczbaKolumn];
+        int i=0;
+        for(String nazwaKolumny: BazaDanych.getBazaDanych().getInformacjeOTabeli().getInformacjaOKolumnie(InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY)){
+            nazwyKolumn[i]=nazwaKolumny;
+            i++;
+        }
+        model.setDataVector(BazaDanych.getBazaDanych().getData(), nazwyKolumn);
         jTable = new JTable(model);
         this.setViewportView(jTable);
         this.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -28,7 +35,14 @@ public class PanelElementow extends JScrollPane{
     }
 
     public void updateModel() {
-        model.setDataVector(BazaDanych.getBazaDanych().getData(), new String[]{"id","nazwa"} );
+        int liczbaKolumn = BazaDanych.getBazaDanych().getInformacjeOTabeli().getLiczbaKolumn();
+        String nazwyKolumn[] = new String[liczbaKolumn];
+        int i=0;
+        for(String nazwaKolumny: BazaDanych.getBazaDanych().getInformacjeOTabeli().getInformacjaOKolumnie(InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY)){
+            nazwyKolumn[i]=nazwaKolumny;
+            i++;
+        }
+        model.setDataVector(BazaDanych.getBazaDanych().getData(), nazwyKolumn );
         jTable.setModel(model);
     }
 
