@@ -12,6 +12,11 @@ public class Menu extends JMenuBar {
     private void dodajComponenty() {
         JMenu menuGlowne = new JMenu("Menu");
         this.add(menuGlowne);
+        JMenuItem wczytajBazeDanychMI = new JMenuItem("Wczytaj bazę danych");
+        wczytajBazeDanychMI.addActionListener(e -> {
+            OknoWczytywaniaBazyDanych oknoWczytywaniaBazyDanych = new OknoWczytywaniaBazyDanych();
+        });
+        menuGlowne.add(wczytajBazeDanychMI);
         JMenuItem zaktualizujIdMI = new JMenuItem("Zaktualizuj ID");
         zaktualizujIdMI.addActionListener(e -> BazaDanych.getBazaDanych().zaktualizujID());
         menuGlowne.add(zaktualizujIdMI);
