@@ -6,8 +6,8 @@ import java.awt.*;
 
 public class PanelElementow extends JScrollPane{
     private static PanelElementow panelElementow;
-    private JTable jTable;
-    DefaultTableModel model = new DefaultTableModel(){
+    private static JTable jTable;
+    static DefaultTableModel model = new DefaultTableModel(){
         @Override
         public boolean isCellEditable(int row, int column) {
             return false;
@@ -17,9 +17,19 @@ public class PanelElementow extends JScrollPane{
         this.setPreferredSize(new Dimension(350, 500));
         this.setBackground(Color.GREEN);
         utworzElementy();
+        if(BazaDanych.getBazaDanych()!=null){
+            zaladujTabele();
+        }
+
+
+
     }
 
     private void utworzElementy() {
+
+    }
+
+    public static void zaladujTabele(){
         int liczbaKolumn = BazaDanych.getBazaDanych().getInformacjeOTabeli().getLiczbaKolumn();
         String nazwyKolumn[] = new String[liczbaKolumn];
         int i=0;
@@ -29,8 +39,8 @@ public class PanelElementow extends JScrollPane{
         }
         model.setDataVector(BazaDanych.getBazaDanych().getData(), nazwyKolumn);
         jTable = new JTable(model);
-        this.setViewportView(jTable);
-        this.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        panelElementow.setViewportView(jTable);
+        panelElementow.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
     }
 

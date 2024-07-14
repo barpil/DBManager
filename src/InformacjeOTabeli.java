@@ -13,7 +13,7 @@ import java.util.List;
 public class InformacjeOTabeli {
     enum InformacjeKolumny{
         NAZWA_KOLUMNY,
-        TYP_DANYCH_KOLUMNY;
+        TYP_DANYCH_KOLUMNY
     }
 
     record Kolumna(String nazwaKolumny, String typDanych){
@@ -44,7 +44,7 @@ public class InformacjeOTabeli {
             statement = connection.createStatement();
             String getKluczGlownyQuery ="SELECT COLUMN_NAME " +
                     "FROM INFORMATION_SCHEMA.COLUMNS " +
-                    "WHERE TABLE_NAME='"+BazaDanych.NAZWA_TABELI+"' AND TABLE_SCHEMA = '"+BazaDanych.NAZWA_BAZY+"' AND COLUMN_KEY = 'PRI';";
+                    "WHERE TABLE_NAME='"+BazaDanych.getBazaDanych().getNazwaTabeli()+"' AND TABLE_SCHEMA = '"+BazaDanych.getBazaDanych().getNazwaBazy()+"' AND COLUMN_KEY = 'PRI';";
             ResultSet resultSet= statement.executeQuery(getKluczGlownyQuery);
             kluczGlowny=resultSet.getString(1);
         }catch(SQLException _){
@@ -62,7 +62,7 @@ public class InformacjeOTabeli {
             statement = connection.createStatement();
             String getKolumnyQuery ="SELECT COLUMN_NAME, DATA_TYPE " +
                     "FROM INFORMATION_SCHEMA.COLUMNS " +
-                    "WHERE TABLE_NAME='"+BazaDanych.NAZWA_TABELI+"' AND TABLE_SCHEMA = '"+BazaDanych.NAZWA_BAZY+"';";
+                    "WHERE TABLE_NAME='"+BazaDanych.getBazaDanych().getNazwaTabeli()+"' AND TABLE_SCHEMA = '"+BazaDanych.getBazaDanych().getNazwaBazy()+"';";
             ResultSet resultSet= statement.executeQuery(getKolumnyQuery);
             while(resultSet.next()){
                 listaKolumn.add(new Kolumna(resultSet.getString("COLUMN_NAME"),resultSet.getString("DATA_TYPE")));

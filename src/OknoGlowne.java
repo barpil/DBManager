@@ -11,6 +11,7 @@ public class OknoGlowne extends JFrame {
         this.setLayout(new BoxLayout(getContentPane(), BoxLayout.LINE_AXIS));
         stworzComponenty();
         this.revalidate();
+
     }
 
     private void stworzComponenty(){

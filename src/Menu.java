@@ -5,18 +5,27 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class Menu extends JMenuBar {
+    JMenu menuGlowne;
     Menu(){
         dodajComponenty();
     }
 
     private void dodajComponenty() {
-        JMenu menuGlowne = new JMenu("Menu");
+        menuGlowne = new JMenu("Menu");
         this.add(menuGlowne);
         JMenuItem wczytajBazeDanychMI = new JMenuItem("Wczytaj bazę danych");
         wczytajBazeDanychMI.addActionListener(e -> {
-            OknoWczytywaniaBazyDanych oknoWczytywaniaBazyDanych = new OknoWczytywaniaBazyDanych();
+            OknoWczytywaniaBazyDanych.showOknoWczytywania();
         });
         menuGlowne.add(wczytajBazeDanychMI);
+
+        if(BazaDanych.getBazaDanych()!=null){
+            dodajOpcjeBazyDanych();
+        }
+
+    }
+
+    private void dodajOpcjeBazyDanych() {
         JMenuItem zaktualizujIdMI = new JMenuItem("Zaktualizuj ID");
         zaktualizujIdMI.addActionListener(e -> BazaDanych.getBazaDanych().zaktualizujID());
         menuGlowne.add(zaktualizujIdMI);

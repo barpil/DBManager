@@ -10,41 +10,58 @@ import java.util.List;
 
 public class BazaDanych {
     private static BazaDanych bazaDanych;
-    public static final String NAZWA_BAZY = "bazatestowa";
-    public static final String NAZWA_TABELI = "lista";
-    private final String NAZWA_UZYTKOWNIKA = "root";
-    private final String HASLO_UZYTKOWNIKA = "TestowanieSQL1";
+
+    /*
+        nazwaSerwera: localhost
+        port: 3306
+        nazwaBazy: bazatestowa
+        nazwaUzytkownika: root
+        haslo: TestowanieSQL1
+
+        tabele: users, lista
+     */
+
+
+    private String nazwaBazy;
+    private String nazwaSerwera;
+    private String port;
+    private String nazwaTabeli = "lista";
+    private String nazwaUzytkownika;
+    private String hasloUzytkownika;
     private List<Row> dane = new LinkedList<>();
     private java.sql.Connection connection;
 
     private InformacjeOTabeli informacjeOTabeli;
 
-    private BazaDanych() {
+    private BazaDanych(String nazwaSerwera, String port, String nazwaBazy, String nazwaUzytkownika, String hasloUzytkownika) throws SQLException {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             //Klasa Connection odpowiada za polaczenie z baza danych
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + NAZWA_BAZY, NAZWA_UZYTKOWNIKA, HASLO_UZYTKOWNIKA);
-            zaktualizujBaze();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
+            connection = DriverManager.getConnection("jdbc:mysql://"+nazwaSerwera+":"+port+"/" + nazwaBazy, nazwaUzytkownika, hasloUzytkownika);
+            this.nazwaSerwera = nazwaSerwera;
+            this.port = port;
+            this.nazwaBazy = nazwaBazy;
+            this.nazwaUzytkownika = nazwaUzytkownika;
+            this.hasloUzytkownika = hasloUzytkownika;
+
+        }catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
 
     public static BazaDanych getBazaDanych() {
-        if (bazaDanych == null) {
-            bazaDanych = new BazaDanych();
-        }
+//        if (bazaDanych == null) {
+//            bazaDanych = new BazaDanych();
+//        }
         return bazaDanych;
     }
 
-    private void zaktualizujBaze() throws SQLException {
+    public void zaktualizujBaze() throws SQLException {
         Statement statement = null;
         dane.clear();
         try {
             statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + NAZWA_TABELI + ";");
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + nazwaTabeli + ";");
             informacjeOTabeli = new InformacjeOTabeli(connection);
             {
                 Row dodawanyRzad;
@@ -127,7 +144,7 @@ public class BazaDanych {
         dane.clear();
         try {
             statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM "+NAZWA_TABELI+" ORDER BY " + by + " " + order + ";");
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM "+ nazwaTabeli+" ORDER BY " + by + " " + order + ";");
             informacjeOTabeli = new InformacjeOTabeli(connection);
             {
                 Row dodawanyRzad;
@@ -179,6 +196,10 @@ public class BazaDanych {
         }
     }
 
+    public static void zmienBaze(String nazwaSerwera, String port, String nazwaBazy, String nazwaUzytkownika, String hasloUzytkownika) throws SQLException {
+        bazaDanych = new BazaDanych(nazwaSerwera, port, nazwaBazy, nazwaUzytkownika, hasloUzytkownika);
+    }
+
     public List<Row> getDane() {
         return dane;
     }
@@ -195,9 +216,14 @@ public class BazaDanych {
         return obj;
     }
 
-    public InformacjeOTabeli getInformacjeOTabeli() {
-        return informacjeOTabeli;
-    }
+    public InformacjeOTabeli getInformacjeOTabeli() {return informacjeOTabeli;}
+
+    public String getNazwaBazy() {return nazwaBazy;}
+    public String getNazwaTabeli() {return nazwaTabeli;}
+    public void setNazwaBazy(String nazwaBazy) {this.nazwaBazy = nazwaBazy;}
+    public void setNazwaTabeli(String nazwaTabeli) {this.nazwaTabeli = nazwaTabeli;}
+    public void setNazwaUzytkownika(String nazwaUzytkownika) {this.nazwaUzytkownika = nazwaUzytkownika;}
+    public void setHasloUzytkownika(String hasloUzytkownika) {this.hasloUzytkownika = hasloUzytkownika;}
 
 
 }
