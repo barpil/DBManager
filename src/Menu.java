@@ -5,14 +5,17 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class Menu extends JMenuBar {
-    JMenu menuGlowne;
-    Menu(){
+    private static Menu menu;
+    private JMenu menuGlowne;
+    private Menu(){
+        menuGlowne = new JMenu("Menu");
+        this.add(menuGlowne);
+
         dodajComponenty();
     }
 
     private void dodajComponenty() {
-        menuGlowne = new JMenu("Menu");
-        this.add(menuGlowne);
+
         JMenuItem wczytajBazeDanychMI = new JMenuItem("Wczytaj bazę danych");
         wczytajBazeDanychMI.addActionListener(e -> {
             OknoWczytywaniaBazyDanych.showOknoWczytywania();
@@ -21,11 +24,12 @@ public class Menu extends JMenuBar {
 
         if(BazaDanych.getBazaDanych()!=null){
             dodajOpcjeBazyDanych();
+            System.out.println(1);
         }
 
     }
 
-    private void dodajOpcjeBazyDanych() {
+    public void dodajOpcjeBazyDanych() {
         JMenuItem zaktualizujIdMI = new JMenuItem("Zaktualizuj ID");
         zaktualizujIdMI.addActionListener(e -> BazaDanych.getBazaDanych().zaktualizujID());
         menuGlowne.add(zaktualizujIdMI);
@@ -60,7 +64,24 @@ public class Menu extends JMenuBar {
             });
             sortujASC.add(przyciskKolumnyASC);
             sortujDESC.add(przyciskKolumnyDESC);
-            System.out.println("dodano "+nazwaKolumny);
+
         }
+    }
+
+    public static Menu getMenu() {
+        if(menu==null){
+            menu=new Menu();
+        }
+        return menu;
+    }
+
+    public void zaktualizujMenu(){
+        menuGlowne.removeAll();
+        dodajComponenty();
+        OknoGlowne.getOknoGlowne().revalidate();
+    }
+
+    public JMenu getMenuGlowne() {
+        return menuGlowne;
     }
 }

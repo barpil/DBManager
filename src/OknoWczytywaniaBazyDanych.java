@@ -87,16 +87,15 @@ public class OknoWczytywaniaBazyDanych extends JDialog {
         loadButton.addActionListener(e -> {
 
             try {
-                BazaDanych.zmienBaze(liniaIPTB.getText(), liniaPortTB.getText(), liniaNazwaBazyTB.getText(), liniaNazwyUzytkownikaTB.getText(), liniaHaslaUzytkownikaTB.getText());
+                BazaDanych.ustawBaze(liniaIPTB.getText(), liniaPortTB.getText(), liniaNazwaBazyTB.getText(), liniaNazwyUzytkownikaTB.getText(), liniaHaslaUzytkownikaTB.getText());
                 //Przypisanie w tej kolejności bo jeżeli ktoś nie poda poprawnych danych logowania to nie chcemy ich zapamietywac
                 nazwaSerwera = liniaIPTB.getText();
                 port = liniaPortTB.getText();
                 nazwaBazy = liniaNazwaBazyTB.getText();
-                nazwaUzytkownika = liniaHaslaUzytkownikaTB.getText();
+                nazwaUzytkownika = liniaNazwyUzytkownikaTB.getText();
 
-                BazaDanych.getBazaDanych().zaktualizujBaze();
-                PanelElementow.zaladujTabele();
-
+                PanelSterowania.getPanelSterowania().zaktualizujWyborTabelCB();
+                Menu.getMenu().dodajOpcjeBazyDanych();
                 this.dispose();
             }
             catch( SQLSyntaxErrorException ex){

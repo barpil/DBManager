@@ -9,5 +9,6 @@ public class Main {
     private static void uruchom(){
         OknoGlowne.getOknoGlowne();
         OknoWczytywaniaBazyDanych.showOknoWczytywania();
+
     }
 }

@@ -17,10 +17,10 @@ public class OknoGlowne extends JFrame {
     private void stworzComponenty(){
         PanelElementow panelElementow = PanelElementow.getPanelElementow();
         this.add(panelElementow);
-        PanelSterowania panelSterowania = new PanelSterowania();
+        PanelSterowania panelSterowania = PanelSterowania.getPanelSterowania();
         this.add(panelSterowania);
 
-        Menu menu = new Menu();
+        Menu menu = Menu.getMenu();
         this.setJMenuBar(menu);
     }
 

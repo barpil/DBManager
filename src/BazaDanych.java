@@ -25,7 +25,7 @@ public class BazaDanych {
     private String nazwaBazy;
     private String nazwaSerwera;
     private String port;
-    private String nazwaTabeli = "lista";
+    private String nazwaTabeli;
     private String nazwaUzytkownika;
     private String hasloUzytkownika;
     private List<Row> dane = new LinkedList<>();
@@ -196,7 +196,7 @@ public class BazaDanych {
         }
     }
 
-    public static void zmienBaze(String nazwaSerwera, String port, String nazwaBazy, String nazwaUzytkownika, String hasloUzytkownika) throws SQLException {
+    public static void ustawBaze(String nazwaSerwera, String port, String nazwaBazy, String nazwaUzytkownika, String hasloUzytkownika) throws SQLException {
         bazaDanych = new BazaDanych(nazwaSerwera, port, nazwaBazy, nazwaUzytkownika, hasloUzytkownika);
     }
 
@@ -214,6 +214,20 @@ public class BazaDanych {
 
         }
         return obj;
+    }
+
+    public List<String> getNazwyTabel() throws SQLException {
+        List<String> tabele = new ArrayList<>(0);
+        Statement statement = connection.createStatement();
+        String getTablesQueries = "SHOW TABLES;";
+
+        ResultSet resultSet = statement.executeQuery(getTablesQueries);
+        while(resultSet.next()){
+            String nazwa = resultSet.getString(1);
+            tabele.add(nazwa);
+
+        }
+        return tabele;
     }
 
     public InformacjeOTabeli getInformacjeOTabeli() {return informacjeOTabeli;}
