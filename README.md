@@ -11,7 +11,13 @@ Zrobić aplikację okienkową, która pozwoli na:
 - [ ] Możliwość kliknięcia rekordu z wyświetlonej listy i usunięcie go po wciśnięciu odpowiedniego przycisku
 - [x] Sortowanie według kolumn
 - [ ] Możliwość edycji tabeli poprzez JTable
-- [ ] Dostosowanie aplikacji do dowolnej wczytanej bazy danych (W trakcie)
-- [ ] Możliwość wczytania dowolnej bazy danych (W trakcie)
+- [X] Dostosowanie aplikacji do dowolnej wczytanej bazy danych
+- [X] Dostosowanie aplikacji do wczytania dowolnego rodzaju baz danych obsługujących język SQL (innych niż mysql)
+- [X] Możliwość wczytania dowolnej bazy danych
 - [ ] Zastanowienie się nad własnymi wyjątkami i czy są potrzebne
 - [ ] Refaktoryzacja kodu
+
+### Czego nauczył mnie ten projekt
+- Podstawy JDBC
+- Poszerzyłem wiedzę na temat biblioteki Swing
+- Podstawy Maven
