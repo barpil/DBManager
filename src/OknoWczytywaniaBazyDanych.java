@@ -95,7 +95,6 @@ public class OknoWczytywaniaBazyDanych extends JDialog {
                 nazwaUzytkownika = liniaNazwyUzytkownikaTB.getText();
 
                 PanelSterowania.getPanelSterowania().zaktualizujWyborTabelCB();
-                Menu.getMenu().dodajOpcjeBazyDanych();
                 this.dispose();
             }
             catch( SQLSyntaxErrorException ex){

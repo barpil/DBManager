@@ -15,7 +15,7 @@ public class Menu extends JMenuBar {
     }
 
     private void dodajComponenty() {
-
+        menuGlowne.removeAll();
         JMenuItem wczytajBazeDanychMI = new JMenuItem("Wczytaj bazę danych");
         wczytajBazeDanychMI.addActionListener(e -> {
             OknoWczytywaniaBazyDanych.showOknoWczytywania();
@@ -24,7 +24,6 @@ public class Menu extends JMenuBar {
 
         if(BazaDanych.getBazaDanych()!=null){
             dodajOpcjeBazyDanych();
-            System.out.println(1);
         }
 
     }
