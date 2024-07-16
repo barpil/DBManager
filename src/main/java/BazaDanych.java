@@ -108,11 +108,12 @@ public class BazaDanych {
         zaktualizujBaze();
     }
 
-    public void usunDane(int id) throws SQLException { //Tez bedzie trzeba dostosowac dla dowolnej bazy
+    public void usunDane(int numerWiersza) throws SQLException { //Tez bedzie trzeba dostosowac dla dowolnej bazy
         Statement statement = null;
         try {
             statement = connection.createStatement();
-            String deleteQuery = "DELETE FROM users WHERE idusers='" + id + "';";
+            String kluczGlowny = informacjeOTabeli.getKluczGlowny();
+            String deleteQuery = "DELETE FROM "+nazwaTabeli+" WHERE "+kluczGlowny+"='" + dane.get(numerWiersza).getPole(kluczGlowny).getWartosc() + "';";
             statement.execute(deleteQuery);
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -121,6 +122,7 @@ public class BazaDanych {
             statement.close();
         }
         zaktualizujBaze();
+        PanelElementow.zaladujTabele();
     }
 
     public void usunDane(String nazwa) throws SQLException { //Tez bedzie trzeba dostosowac do dowolnej bazy
@@ -189,7 +191,7 @@ public class BazaDanych {
                 }
             }
             zaktualizujBaze();
-            PanelElementow.getPanelElementow().updateModel();
+            PanelElementow.zaladujTabele();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -269,9 +271,9 @@ class Row {
         return listaPol.get(nrKolumny);
     }
 
-    public Pole getPole(String nazwaKolumny) {
+    public Pole<?> getPole(String nazwaKolumny) {
         for (Pole<?> pole : listaPol) {
-            if (pole.getNazwaKolumny() == nazwaKolumny) return pole;
+            if (pole.getNazwaKolumny().equals(nazwaKolumny)) return pole;
         }
         return null;
     }
@@ -302,5 +304,9 @@ class Pole<T> {
         return wartosc;
     }
 
+    @Override
+    public String toString(){
+        return "["+nazwaKolumny+":"+wartosc+"]";
+    }
 
 }

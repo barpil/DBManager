@@ -52,7 +52,7 @@ public class InsertOkno extends JTextField {
             return false;
         }
         this.setText("");
-        PanelElementow.getPanelElementow().updateModel();
+        PanelElementow.zaladujTabele();
         return true;
     }
 
@@ -74,7 +74,7 @@ public class InsertOkno extends JTextField {
             return false;
         }
         this.setText("");
-        PanelElementow.getPanelElementow().updateModel();
+        PanelElementow.zaladujTabele();
         return true;
     }
 

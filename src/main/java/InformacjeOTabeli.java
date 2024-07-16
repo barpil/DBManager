@@ -44,9 +44,10 @@ public class InformacjeOTabeli {
                     "FROM INFORMATION_SCHEMA.COLUMNS " +
                     "WHERE TABLE_NAME='"+BazaDanych.getBazaDanych().getNazwaTabeli()+"' AND TABLE_SCHEMA = '"+BazaDanych.getBazaDanych().getNazwaBazy()+"' AND COLUMN_KEY = 'PRI';";
             ResultSet resultSet= statement.executeQuery(getKluczGlownyQuery);
+            resultSet.next();
             kluczGlowny=resultSet.getString(1);
-        }catch(SQLException _){
-
+        }catch(SQLException e){
+            throw new RuntimeException(e);
         }finally {
             assert statement!=null;
             statement.close();

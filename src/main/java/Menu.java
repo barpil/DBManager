@@ -43,7 +43,7 @@ public class Menu extends JMenuBar {
             przyciskKolumnyASC.addActionListener(e -> {
                 try {
                     BazaDanych.getBazaDanych().sortujDane(nazwaKolumny,"ASC");
-                    PanelElementow.getPanelElementow().updateModel();
+                    PanelElementow.zaladujTabele();
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);
                 }
@@ -52,7 +52,7 @@ public class Menu extends JMenuBar {
             przyciskKolumnyDESC.addActionListener(e -> {
                 try {
                     BazaDanych.getBazaDanych().sortujDane(nazwaKolumny,"DESC");
-                    PanelElementow.getPanelElementow().updateModel();
+                    PanelElementow.zaladujTabele();
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);
                 }
