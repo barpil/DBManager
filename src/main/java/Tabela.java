@@ -34,16 +34,17 @@ public class Tabela extends JTable {
         private final PopUpMenuTabeli thisPopUpMenu = this;
         PopUpMenuTabeli(Tabela tabela){
 
-            JMenuItem usunWiersz = new JMenuItem("Usuń wiersz");
-            usunWiersz.addActionListener(e -> {
+            JMenuItem deleteRows = new JMenuItem("Delete rows");
+            deleteRows.addActionListener(e -> {
                 try {
-                    BazaDanych.getBazaDanych().usunDane(tabela.getSelectedRow());
+                    BazaDanych.getBazaDanych().usunDane(tabela.getSelectedRows());
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);
                 }
             });
 
-            this.add(usunWiersz);
+
+            this.add(deleteRows);
 
             tabela.addMouseListener(new MouseAdapter() {
                 @Override

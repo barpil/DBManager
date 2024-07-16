@@ -64,7 +64,7 @@ public class InsertOkno extends JTextField {
                     BazaDanych.getBazaDanych().usunDane(Integer.parseInt(this.getText()));
                     break;
                 case "nazwa":
-                    BazaDanych.getBazaDanych().usunDane(this.getText());
+                    //BazaDanych.getBazaDanych().usunDane(this.getText());
                     break;
                 default:
                     return false;

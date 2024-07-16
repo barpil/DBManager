@@ -125,11 +125,18 @@ public class BazaDanych {
         PanelElementow.zaladujTabele();
     }
 
-    public void usunDane(String nazwa) throws SQLException { //Tez bedzie trzeba dostosowac do dowolnej bazy
+    public void usunDane(int[] numeryWierszy) throws SQLException { //Tez bedzie trzeba dostosowac dla dowolnej bazy
         Statement statement = null;
+        if(numeryWierszy.length<1) return;
         try {
             statement = connection.createStatement();
-            String deleteQuery = "DELETE FROM users WHERE nazwa='" + nazwa + "';";
+            String kluczGlowny = informacjeOTabeli.getKluczGlowny();
+            String deleteQuery = "DELETE FROM "+nazwaTabeli+" WHERE "+kluczGlowny+" IN (";
+            deleteQuery+=dane.get(numeryWierszy[0]).getPole(kluczGlowny).getWartosc();
+            for(int i=1; i< numeryWierszy.length;i++){
+                deleteQuery+=", "+dane.get(numeryWierszy[i]).getPole(kluczGlowny).getWartosc();
+            }
+            deleteQuery+=");";
             statement.execute(deleteQuery);
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -138,6 +145,7 @@ public class BazaDanych {
             statement.close();
         }
         zaktualizujBaze();
+        PanelElementow.zaladujTabele();
     }
 
     public void sortujDane(String by, String order) throws SQLException {
