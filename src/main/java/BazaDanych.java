@@ -1,7 +1,4 @@
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,6 +25,7 @@ public class BazaDanych {
     private String hasloUzytkownika;
     private List<Row> dane = new LinkedList<>();
     private final java.sql.Connection connection;
+    private SQLThreadQueue sqlThreadQueue = new SQLThreadQueue();
 
     private InformacjeOTabeli informacjeOTabeli;
 
@@ -54,42 +52,8 @@ public class BazaDanych {
         return bazaDanych;
     }
 
-    public void zaktualizujBaze() throws SQLException {
-        Statement statement = null;
-        dane.clear();
-        try {
-            statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + nazwaTabeli + ";");
-            informacjeOTabeli = new InformacjeOTabeli(connection);
-            {
-                Row dodawanyRzad;
-                int liczbaKolumn = informacjeOTabeli.getLiczbaKolumn();
-                while (resultSet.next()) {
-                    dodawanyRzad = new Row(liczbaKolumn);
-                    for (int i = 0; i < liczbaKolumn; i++) {
-                        String nazwaKolumny = informacjeOTabeli.getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY);
-                        switch (informacjeOTabeli.getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.TYP_DANYCH_KOLUMNY)) {
-                            case "int":
-                                dodawanyRzad.addPole(nazwaKolumny, Integer.parseInt(resultSet.getString(nazwaKolumny)));
-                                break;
-                            case "varchar":
-                                dodawanyRzad.addPole(nazwaKolumny, resultSet.getString(nazwaKolumny));
-                                break;
-                            default:
-                                dodawanyRzad.addPole(nazwaKolumny+" (type error)", null );
-                                break; //Mozna dodac informacje o bledzie
-                        }
-                    }
-                    dane.add(dodawanyRzad);
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            assert statement != null;
-            statement.close();
-        }
-
+    synchronized public void zaktualizujBaze() throws SQLException {
+        utworzWatek(new DBUpdate(connection));
     }
 
     public void dodajDane(int id, String nazwa) throws SQLException { //Trzeba bedzie wymyslic inny mechanizm dodawania danych ktory bedzie mozliwy do korzystania dla dowolnej bazy
@@ -126,26 +90,8 @@ public class BazaDanych {
     }
 
     public void usunDane(int[] numeryWierszy) throws SQLException { //Tez bedzie trzeba dostosowac dla dowolnej bazy
-        Statement statement = null;
-        if(numeryWierszy.length<1) return;
-        try {
-            statement = connection.createStatement();
-            String kluczGlowny = informacjeOTabeli.getKluczGlowny();
-            String deleteQuery = "DELETE FROM "+nazwaTabeli+" WHERE "+kluczGlowny+" IN (";
-            deleteQuery+=dane.get(numeryWierszy[0]).getPole(kluczGlowny).getWartosc();
-            for(int i=1; i< numeryWierszy.length;i++){
-                deleteQuery+=", "+dane.get(numeryWierszy[i]).getPole(kluczGlowny).getWartosc();
-            }
-            deleteQuery+=");";
-            statement.execute(deleteQuery);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            assert statement != null;
-            statement.close();
-        }
-        zaktualizujBaze();
-        PanelElementow.zaladujTabele();
+        utworzWatek(new DBDelete(connection, numeryWierszy));
+
     }
 
     public void sortujDane(String by, String order) throws SQLException {
@@ -209,6 +155,17 @@ public class BazaDanych {
         bazaDanych = new BazaDanych(nazwaSerwera, port, nazwaBazy, nazwaUzytkownika, hasloUzytkownika);
     }
 
+    private Thread utworzWatek(Runnable runnable){
+        Thread thread = new Thread(runnable);
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return thread;
+    }
+
     public List<Row> getDane() {
         return dane;
     }
@@ -241,8 +198,13 @@ public class BazaDanych {
 
     public InformacjeOTabeli getInformacjeOTabeli() {return informacjeOTabeli;}
 
+    public void setInformacjeOTabeli(InformacjeOTabeli informacjeOTabeli) {this.informacjeOTabeli = informacjeOTabeli;}
+
     public String getNazwaBazy() {return nazwaBazy;}
     public String getNazwaTabeli() {return nazwaTabeli;}
+
+    public SQLThreadQueue getSqlThreadQueue() {return sqlThreadQueue;}
+
     public void setNazwaBazy(String nazwaBazy) {this.nazwaBazy = nazwaBazy;}
     public void setNazwaTabeli(String nazwaTabeli) {this.nazwaTabeli = nazwaTabeli;}
     public void setNazwaUzytkownika(String nazwaUzytkownika) {this.nazwaUzytkownika = nazwaUzytkownika;}
