@@ -25,6 +25,7 @@ public class DBDelete extends DBConnector implements SQLRunnable{
             }
             deleteQuery+=");";
             statement.execute(deleteQuery);
+            System.out.println("Wysłano query: "+deleteQuery);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
@@ -35,12 +36,8 @@ public class DBDelete extends DBConnector implements SQLRunnable{
                 throw new RuntimeException(e);
             }
         }
-        try {
-            BazaDanych.getBazaDanych().zaktualizujBaze();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        PanelElementow.zaladujTabele(); //BEDZIE TRZEBA POUSUWAC TO LADOWANIE I AKTUALIZACJE SKORO ROBIE KOLEJKE THREAD
+
+         //BEDZIE TRZEBA POUSUWAC TO LADOWANIE I AKTUALIZACJE SKORO ROBIE KOLEJKE THREAD
         poinformujOZakonczeniuWatku();
     }
 

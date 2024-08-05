@@ -1,3 +1,5 @@
 public interface SQLRunnable extends Runnable{
-    void poinformujOZakonczeniuWatku();
+    default void poinformujOZakonczeniuWatku(){
+        BazaDanych.getBazaDanych().getSqlThreadQueue().zakonczonoWatek();
+    }
 }

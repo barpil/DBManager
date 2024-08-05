@@ -11,14 +11,25 @@ public class ThreadProgressBar extends JProgressBar {
         this.setMinimumSize(new Dimension(150,50));
         this.setMinimum(MIN_VALUE);
         this.setMaximum(MAX_VALUE);
-
-        this.setVisible(false);
+        przygotujProgressBar();
+        PanelSterowania.getPanelSterowania().getPanelProgressBara().add(this);
+        this.setVisible(true);
+        System.out.println("Pokazano progress bar");
+        PanelSterowania.getPanelSterowania().getPanelProgressBara().setBackground(Color.black);
+        PanelSterowania.getPanelSterowania().revalidate();
+        PanelSterowania.getPanelSterowania().repaint();
     }
 
-    public void przygotujProgressBar(){
+    private void przygotujProgressBar(){
         this.setValue(MIN_VALUE);
         progressUnit= MAX_VALUE/BazaDanych.getBazaDanych().getSqlThreadQueue().liczbaPozostalychWatkow();
-        //Dokonczyc przygotowywanie progressBara
+    }
 
+    public void zwiekszProgress(){
+        this.setValue(this.getValue()+progressUnit);
+        System.out.println(getValue());
+        if(this.getValue()>=MAX_VALUE){
+            setVisible(false);
+        }
     }
 }

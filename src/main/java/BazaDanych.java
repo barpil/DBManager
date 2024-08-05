@@ -53,7 +53,15 @@ public class BazaDanych {
     }
 
     synchronized public void zaktualizujBaze() throws SQLException {
-        utworzWatek(new DBUpdate(connection));
+        Thread thread = new Thread(new DBUpdate(connection));
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+
     }
 
     public void dodajDane(int id, String nazwa) throws SQLException { //Trzeba bedzie wymyslic inny mechanizm dodawania danych ktory bedzie mozliwy do korzystania dla dowolnej bazy
@@ -155,15 +163,8 @@ public class BazaDanych {
         bazaDanych = new BazaDanych(nazwaSerwera, port, nazwaBazy, nazwaUzytkownika, hasloUzytkownika);
     }
 
-    private Thread utworzWatek(Runnable runnable){
-        Thread thread = new Thread(runnable);
-        thread.start();
-        try {
-            thread.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        return thread;
+    private void utworzWatek(SQLRunnable runnable){
+        getSqlThreadQueue().dodajWatek(runnable);
     }
 
     public List<Row> getDane() {

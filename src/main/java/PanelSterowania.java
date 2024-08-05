@@ -1,12 +1,16 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.util.List;
 
 public class PanelSterowania extends JPanel {
     private static PanelSterowania panelSterowania;
     private WyborTabeliCB wyborTabeliCB;
+    private JPanel panelProgressBara;
     private ThreadProgressBar progressBar;
+    private Button przyciskRozpoczecia;
 
     private PanelSterowania() {
         this.setPreferredSize(new Dimension(150, 500));
@@ -27,11 +31,25 @@ public class PanelSterowania extends JPanel {
 
 
         this.add(Box.createVerticalGlue());
-        progressBar= new ThreadProgressBar();
-        this.add(progressBar);
+        przyciskRozpoczecia= new Button("Start");
+        przyciskRozpoczecia.addActionListener(e -> {
+            BazaDanych.getBazaDanych().getSqlThreadQueue().rozpocznijWykonywanie();
+            System.out.println("Klik");
+        });
+        this.add(przyciskRozpoczecia);
+        panelProgressBara = new JPanel();
+        panelProgressBara.setBackground(Color.MAGENTA);
+        this.add(panelProgressBara);
+
+
 
 
     }
+
+    public ThreadProgressBar getProgressBar() {
+        return progressBar;
+    }
+
     public void zaktualizujWyborTabelCB(){
 
             wyborTabeliCB.zaktualizujOpcje();
@@ -78,7 +96,7 @@ public class PanelSterowania extends JPanel {
         }
     }
 
-    public ThreadProgressBar getProgressBar() {
-        return progressBar;
+    public JPanel getPanelProgressBara() {
+        return panelProgressBara;
     }
 }

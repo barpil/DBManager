@@ -18,6 +18,7 @@ public class Tabela extends JTable {
     }
 
     public void updateModel(){
+        System.out.println("AAA");
         int liczbaKolumn = BazaDanych.getBazaDanych().getInformacjeOTabeli().getLiczbaKolumn();
         String nazwyKolumn[] = new String[liczbaKolumn];
         int i=0;
