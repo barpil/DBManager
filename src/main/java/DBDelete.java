@@ -43,6 +43,11 @@ public class DBDelete extends DBConnector implements SQLRunnable{
 
     @Override
     public void poinformujOZakonczeniuWatku() {
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         BazaDanych.getBazaDanych().getSqlThreadQueue().zakonczonoWatek();
     }
 }

@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 
 public class ThreadProgressBar extends JProgressBar {
     final private int MIN_VALUE = 0;
@@ -8,28 +9,45 @@ public class ThreadProgressBar extends JProgressBar {
     private int progressUnit;
 
     ThreadProgressBar(){
-        this.setMinimumSize(new Dimension(150,50));
-        this.setMinimum(MIN_VALUE);
-        this.setMaximum(MAX_VALUE);
-        przygotujProgressBar();
-        PanelSterowania.getPanelSterowania().getPanelProgressBara().add(this);
+
+            this.setMinimumSize(new Dimension(150, 50));
+            this.setMinimum(MIN_VALUE);
+            this.setMaximum(MAX_VALUE);
+
+            this.setStringPainted(true);
+
+
+
+
+
+    }
+
+    public void przygotujProgressBar() {
         this.setVisible(true);
-        System.out.println("Pokazano progress bar");
-        PanelSterowania.getPanelSterowania().getPanelProgressBara().setBackground(Color.black);
-        PanelSterowania.getPanelSterowania().revalidate();
-        PanelSterowania.getPanelSterowania().repaint();
-    }
-
-    private void przygotujProgressBar(){
         this.setValue(MIN_VALUE);
-        progressUnit= MAX_VALUE/BazaDanych.getBazaDanych().getSqlThreadQueue().liczbaPozostalychWatkow();
+        progressUnit = MAX_VALUE / BazaDanych.getBazaDanych().getSqlThreadQueue().liczbaPozostalychWatkow();
+        this.repaint();
     }
 
-    public void zwiekszProgress(){
-        this.setValue(this.getValue()+progressUnit);
-        System.out.println(getValue());
-        if(this.getValue()>=MAX_VALUE){
-            setVisible(false);
-        }
+    public void zwiekszProgress() {
+
+        this.setValue(this.getValue() + progressUnit);
+        System.out.println(this.getValue());
+        SwingUtilities.invokeLater(() ->{
+            this.revalidate();
+            this.repaint();
+            if (this.getValue() >= MAX_VALUE) {
+                try {
+                    Thread.sleep(500);
+                    this.setVisible(false);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+        });
+
+
+
     }
 }

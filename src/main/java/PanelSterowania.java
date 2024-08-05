@@ -40,7 +40,8 @@ public class PanelSterowania extends JPanel {
         panelProgressBara = new JPanel();
         panelProgressBara.setBackground(Color.MAGENTA);
         this.add(panelProgressBara);
-
+        progressBar = new ThreadProgressBar();
+        panelProgressBara.add(progressBar);
 
 
 
