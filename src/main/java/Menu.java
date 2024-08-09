@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.awt.*;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -27,7 +28,10 @@ public class Menu extends JMenuBar {
     public void dodajOpcjeBazyDanych() {
         JMenuItem zaktualizujIdMI = new JMenuItem("Zaktualizuj ID");
         zaktualizujIdMI.addActionListener(e -> BazaDanych.getBazaDanych().zaktualizujID());
+        JMenuItem edytujTabeleMI = new JMenuItem("Edytuj tabelę");
+        edytujTabeleMI.addActionListener(e -> edytujTabele());
         menuGlowne.add(zaktualizujIdMI);
+        menuGlowne.add(edytujTabeleMI);
         JMenu sortujWyniki = new JMenu("Sortuj...");
         menuGlowne.add(sortujWyniki);
         JMenu sortujASC = new JMenu("ASC");
@@ -61,6 +65,11 @@ public class Menu extends JMenuBar {
             sortujDESC.add(przyciskKolumnyDESC);
 
         }
+    }
+
+    private void edytujTabele() {
+        OknoEdycjiTabeli oknoEdytowaniaTabeli = new OknoEdycjiTabeli(OknoGlowne.getOknoGlowne(), "Edytuj tabelę", true);
+
     }
 
     public static Menu getMenu() {

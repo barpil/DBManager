@@ -4,7 +4,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 
-public class Tabela extends JTable {
+public class TabelaEdycji extends JTable {
     static DefaultTableModel model = new DefaultTableModel(){
         @Override
         public boolean isCellEditable(int row, int column) {
@@ -12,9 +12,9 @@ public class Tabela extends JTable {
         }
     };
 
-    Tabela(){
-       updateModel();
-       PopUpMenuTabeli popUpMenuTabeli = new PopUpMenuTabeli(this);
+    TabelaEdycji(){
+        updateModel();
+        PopUpMenuTabeliEdycji popUpMenuTabeli = new PopUpMenuTabeliEdycji(this);
     }
 
     public void updateModel(){
@@ -25,14 +25,14 @@ public class Tabela extends JTable {
             nazwyKolumn[i]=nazwaKolumny;
             i++;
         }
-        model.setDataVector(BazaDanych.getBazaDanych().getData(), nazwyKolumn);
+        model.setDataVector(null, nazwyKolumn);
         this.setModel(model);
 
     }
 
-    class PopUpMenuTabeli extends JPopupMenu{
-        private final PopUpMenuTabeli thisPopUpMenu = this;
-        PopUpMenuTabeli(Tabela tabela){
+    class PopUpMenuTabeliEdycji extends JPopupMenu{
+        private final PopUpMenuTabeliEdycji thisPopUpMenu = this;
+        PopUpMenuTabeliEdycji(JTable tabela){
 
             JMenuItem deleteRows = new JMenuItem("Delete rows");
             deleteRows.addActionListener(e -> {
