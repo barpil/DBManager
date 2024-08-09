@@ -4,7 +4,7 @@ import java.awt.*;
 
 public class PanelElementow extends JScrollPane{
     private static PanelElementow panelElementow;
-    private static Tabela tabela;
+    private static TabelaPodgladuBazyDanych tabelaPodgladuBazyDanych;
     static DefaultTableModel model = new DefaultTableModel(){
         @Override
         public boolean isCellEditable(int row, int column) {
@@ -17,7 +17,7 @@ public class PanelElementow extends JScrollPane{
         utworzElementy();
         if(BazaDanych.getBazaDanych()!=null){
             zaladujTabele();
-            panelElementow.setViewportView(tabela);
+            panelElementow.setViewportView(tabelaPodgladuBazyDanych);
             panelElementow.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         }
 
@@ -30,8 +30,8 @@ public class PanelElementow extends JScrollPane{
     }
 
     public static void zaladujTabele(){
-        tabela = new Tabela();
-        panelElementow.setViewportView(tabela);
+        tabelaPodgladuBazyDanych = new TabelaPodgladuBazyDanych();
+        panelElementow.setViewportView(tabelaPodgladuBazyDanych);
         panelElementow.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
     }

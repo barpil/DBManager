@@ -4,7 +4,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 
-public class Tabela extends JTable {
+abstract public class TabelaSQL extends JTable {
+    String[] nazwyKolumnTabeli=null;
+    Object[][] daneTabeli=null;
+
+
     static DefaultTableModel model = new DefaultTableModel(){
         @Override
         public boolean isCellEditable(int row, int column) {
@@ -12,12 +16,16 @@ public class Tabela extends JTable {
         }
     };
 
-    Tabela(){
-       updateModel();
-       PopUpMenuTabeli popUpMenuTabeli = new PopUpMenuTabeli(this);
+    TabelaSQL(){
+        updateColumnNames();
+        updateData();
+        model.setDataVector(daneTabeli, nazwyKolumnTabeli);
+        this.setModel(model);
+
+        PopUpMenuTabeli popUpMenuTabeli = new PopUpMenuTabeli(this);
     }
 
-    public void updateModel(){
+    private void updateColumnNames(){
         int liczbaKolumn = BazaDanych.getBazaDanych().getInformacjeOTabeli().getLiczbaKolumn();
         String nazwyKolumn[] = new String[liczbaKolumn];
         int i=0;
@@ -25,14 +33,14 @@ public class Tabela extends JTable {
             nazwyKolumn[i]=nazwaKolumny;
             i++;
         }
-        model.setDataVector(BazaDanych.getBazaDanych().getData(), nazwyKolumn);
-        this.setModel(model);
-
+        nazwyKolumnTabeli = nazwyKolumn;
     }
+
+    protected abstract void updateData();
 
     class PopUpMenuTabeli extends JPopupMenu{
         private final PopUpMenuTabeli thisPopUpMenu = this;
-        PopUpMenuTabeli(Tabela tabela){
+        PopUpMenuTabeli(TabelaSQL tabela){
 
             JMenuItem deleteRows = new JMenuItem("Delete rows");
             deleteRows.addActionListener(e -> {

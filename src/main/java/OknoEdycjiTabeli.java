@@ -35,7 +35,8 @@ public class OknoEdycjiTabeli extends JDialog {
         panelDodawaniaWierszy.add(dolnaScrollPane);
 
 
-        JPanel panelPrzyciskow = new JPanel(new BoxLayout(panelDodawaniaWierszy, BoxLayout.Y_AXIS));
+        JPanel panelPrzyciskow = new JPanel();
+        panelPrzyciskow.setLayout(new BoxLayout(panelPrzyciskow, BoxLayout.Y_AXIS));
         Button dodajWierszBtn = new Button("+");
         dodajWierszBtn.addActionListener(e -> {
             dodajWiersz();
@@ -46,6 +47,7 @@ public class OknoEdycjiTabeli extends JDialog {
         wyczyscWierszBtn.addActionListener(e -> {
             wyczyscWiersz();
         });
+        panelPrzyciskow.add(wyczyscWierszBtn);
 
 
         panelDodawaniaWierszy.add(panelPrzyciskow);

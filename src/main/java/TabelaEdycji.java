@@ -4,7 +4,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 
-public class TabelaEdycji extends JTable {
+public class TabelaEdycji extends TabelaSQL {
     static DefaultTableModel model = new DefaultTableModel(){
         @Override
         public boolean isCellEditable(int row, int column) {
@@ -15,6 +15,11 @@ public class TabelaEdycji extends JTable {
     TabelaEdycji(){
         updateModel();
         PopUpMenuTabeliEdycji popUpMenuTabeli = new PopUpMenuTabeliEdycji(this);
+    }
+
+    @Override
+    protected void updateData() {
+        
     }
 
     public void updateModel(){

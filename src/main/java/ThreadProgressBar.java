@@ -15,7 +15,7 @@ public class ThreadProgressBar extends JProgressBar {
             this.setMaximum(MAX_VALUE);
 
             this.setStringPainted(true);
-
+            this.setVisible(false);
 
 
 
