@@ -1,0 +1,7 @@
+# Autologin settings
+autologin.enabled=true
+autologin.serverName=localhost
+autologin.port=3306
+autologin.databaseName=bazatestowa
+autologin.username=root
+autologin.userPassword=TestowanieSQL1

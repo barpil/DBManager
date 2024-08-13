@@ -13,6 +13,13 @@ public class OknoWczytywaniaBazyDanych extends JDialog {
     private static String nazwaUzytkownika;
     JPanel panelWewnetrzny;
     private OknoWczytywaniaBazyDanych(){
+        if(ConfigFileOperator.isAutologinEnabled()){
+            ConfigFileOperator.AutologinProperties autologinProperties = ConfigFileOperator.getAutologinProperties();
+            assert autologinProperties != null;
+            loadDatabase(autologinProperties.serverName(), autologinProperties.port(),autologinProperties.databaseName(),autologinProperties.username(), autologinProperties.password());
+            ConfigFileOperator.autoLoginAlreadyPerformed();
+            return;
+        }
         this.setModalityType(ModalityType.APPLICATION_MODAL);
         this.setSize(new Dimension(270,310));
         this.setLocationRelativeTo(OknoGlowne.getOknoGlowne());
@@ -83,27 +90,8 @@ public class OknoWczytywaniaBazyDanych extends JDialog {
         Button loadButton = new Button("Load");
         loadButton.setPreferredSize(new Dimension(70,20));
         loadButton.addActionListener(e -> {
-
-            try {
-                BazaDanych.ustawBaze(liniaIPTB.getText(), liniaPortTB.getText(), liniaNazwaBazyTB.getText(), liniaNazwyUzytkownikaTB.getText(), liniaHaslaUzytkownikaTB.getText());
-                //Przypisanie w tej kolejności bo jeżeli ktoś nie poda poprawnych danych logowania to nie chcemy ich zapamietywac
-                nazwaSerwera = liniaIPTB.getText();
-                port = liniaPortTB.getText();
-                nazwaBazy = liniaNazwaBazyTB.getText();
-                nazwaUzytkownika = liniaNazwyUzytkownikaTB.getText();
-
-                PanelSterowania.getPanelSterowania().zaktualizujWyborTabelCB();
-                this.dispose();
-            }
-            catch( SQLSyntaxErrorException ex){
-                JOptionPane.showMessageDialog(this,"An incorrect database name has been entered!", "Invalid database error", JOptionPane.ERROR_MESSAGE);
-            }
-            catch(CommunicationsException ex){
-                JOptionPane.showMessageDialog(this,"An unknown server name or port has been entered!", "Invalid server error", JOptionPane.ERROR_MESSAGE);
-            }
-            catch (SQLException ex) {
-                JOptionPane.showMessageDialog(this,"An incorrect login data has been provided!", "Invalid login error", JOptionPane.ERROR_MESSAGE);
-            }
+            loadDatabase(liniaIPTB.getText(), liniaPortTB.getText(),liniaNazwaBazyTB.getText(), liniaNazwyUzytkownikaTB.getText(), liniaHaslaUzytkownikaTB.getText());
+            this.dispose();
         });
         liniaPrzyciskow.add(loadButton);
         Button declineButton = new Button("Decline");
@@ -122,7 +110,40 @@ public class OknoWczytywaniaBazyDanych extends JDialog {
         this.add(liniaPrzyciskow);
 
     }
+    private void loadDatabase(String serverName, String portNumber, String databaseName, String username, String password){
+        try {
+            BazaDanych.ustawBaze(serverName, portNumber, databaseName, username, password);
+            //Przypisanie w tej kolejności bo jeżeli ktoś nie poda poprawnych danych logowania to nie chcemy ich zapamietywac
+            nazwaSerwera = serverName;
+            port = portNumber;
+            nazwaBazy = databaseName;
+            nazwaUzytkownika = username;
 
+            PanelSterowania.getPanelSterowania().zaktualizujWyborTabelCB();
+
+        }
+        catch( SQLSyntaxErrorException ex){
+            String message = "";
+            if(ConfigFileOperator.isAutologinEnabled()){
+                message+="Autologin Error: ";
+            }
+            JOptionPane.showMessageDialog(this,message+"An incorrect database name has been entered!", "Invalid database error", JOptionPane.ERROR_MESSAGE);
+        }
+        catch(CommunicationsException ex){
+            String message = "";
+            if(ConfigFileOperator.isAutologinEnabled()){
+                message+="Autologin Error: ";
+            }
+            JOptionPane.showMessageDialog(this,message+"An unknown server name or port has been entered!", "Invalid server error", JOptionPane.ERROR_MESSAGE);
+        }
+        catch (SQLException ex) {
+            String message = "";
+            if(ConfigFileOperator.isAutologinEnabled()){
+                message+="Autologin Error: ";
+            }
+            JOptionPane.showMessageDialog(this,message+"An incorrect login data has been provided!", "Invalid login error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
     public static void showOknoWczytywania(){
         oknoWczytywaniaBazyDanych= new OknoWczytywaniaBazyDanych();
     }
