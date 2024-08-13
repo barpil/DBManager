@@ -8,9 +8,10 @@ Zrobić aplikację okienkową, która pozwoli na:
 - [x] Wpisywanie nazwy gracza i zapisanie go do bazy danych jeśli jeszcze w niej nie jest
 - [x] Usunięcie z bazy gracza o danej nazwie, jeśli istnieje
 - [x] Wyświetlenie w okienku wszystkich graczy w bazie
-- [ ] Możliwość kliknięcia gracza z wyświetlonej listy i usunięcie go po wciśnięciu odpowiedniego przycisku (Lista powinna mieć możliwość posortowania według id oraz według nazwy gracza)
+- [x] Możliwość kliknięcia gracza z wyświetlonej listy i usunięcie go po wciśnięciu odpowiedniego przycisku
 - [ ] Możliwość edycji tabeli poprzez JTable\
-- [ ] Dostosowanie aplikacji do dowolnej wczytanej bazy danych
-- [ ] Możliwość wczytania dowolnej bazy danych
+- [x] Dostosowanie aplikacji do dowolnej wczytanej bazy danych
+- [x] Możliwość wczytania dowolnej bazy danych
+- [ ] Dostosowanie aplikacji do baz innych niż MySql
 - [ ] Zastanowienie się nad własnymi wyjątkami i czy są potrzebne
 - [ ] Refaktoryzacja kodu
