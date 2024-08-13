@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 public class OknoEdycjiTabeli extends JDialog {
@@ -27,25 +28,65 @@ public class OknoEdycjiTabeli extends JDialog {
         panelDodawaniaWierszy.setLayout(new BoxLayout(panelDodawaniaWierszy, BoxLayout.X_AXIS));
         panelDodawaniaWierszy.setPreferredSize(new Dimension(400, 50));
 
-        JScrollPane dolnaScrollPane = new JScrollPane();
-        TabelaEdycji tabelaEdycji = new TabelaEdycji();
-        dolnaScrollPane.setViewportView(tabelaEdycji);
-        dolnaScrollPane.setPreferredSize(new Dimension(400, 50));
+        class TabelaDodawaniaWierszy extends TabelaSQL{
 
-        panelDodawaniaWierszy.add(dolnaScrollPane);
+            TabelaDodawaniaWierszy(){
+                super(true);
+            }
+
+            @Override
+            protected void updateData() {
+                daneTabeli= new Object[1][nazwyKolumnTabeli.length];
+                for(int i=0; i<nazwyKolumnTabeli.length;i++){
+                    daneTabeli[0][i]=null;
+                }
+            }
+
+
+
+            private void wyczyscWiersz() {
+                updateModel();
+            }
+
+            private void dodajWiersz() {
+                Row dodawanyWiersz = new Row(InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn());
+                if (this.isEditing()) {
+                    this.getCellEditor().stopCellEditing();
+                }
+                for(int i=0; i<InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn();i++){
+                    dodawanyWiersz.addPole(InformacjeOTabeli.getInformacjeOTabeli().getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY), this.getModel().getValueAt(0,i));
+
+                }
+
+                tabelaPodgladu.dodajWiersz(dodawanyWiersz);
+            }
+        }
+
+
+
+
+
+        JScrollPane dolnyScrollPane = new JScrollPane();
+        TabelaDodawaniaWierszy tabelaDodawaniaWierszy = new TabelaDodawaniaWierszy();
+        dolnyScrollPane.setViewportView(tabelaDodawaniaWierszy);
+        dolnyScrollPane.setPreferredSize(new Dimension(400, 50));
+
+        panelDodawaniaWierszy.add(dolnyScrollPane);
 
 
         JPanel panelPrzyciskow = new JPanel();
         panelPrzyciskow.setLayout(new BoxLayout(panelPrzyciskow, BoxLayout.Y_AXIS));
         Button dodajWierszBtn = new Button("+");
+
         dodajWierszBtn.addActionListener(e -> {
-            dodajWiersz();
+            tabelaDodawaniaWierszy.dodajWiersz();
+            tabelaDodawaniaWierszy.wyczyscWiersz();
         });
         panelPrzyciskow.add(dodajWierszBtn);
 
         Button wyczyscWierszBtn = new Button("Clear");
         wyczyscWierszBtn.addActionListener(e -> {
-            wyczyscWiersz();
+            tabelaDodawaniaWierszy.wyczyscWiersz();
         });
         panelPrzyciskow.add(wyczyscWierszBtn);
 
@@ -57,13 +98,14 @@ public class OknoEdycjiTabeli extends JDialog {
         this.add(panelGlowny);
     }
 
-    private void dodajWiersz() {
-        // Implementacja dodawania wiersza
-    }
 
-    private void wyczyscWiersz() {
 
-    }
+
+
+
+
+
+
 
 
 }

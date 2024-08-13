@@ -9,21 +9,21 @@ abstract public class TabelaSQL extends JTable {
     Object[][] daneTabeli=null;
 
 
-    static DefaultTableModel model = new DefaultTableModel(){
-        @Override
-        public boolean isCellEditable(int row, int column) {
-            return false;
-        }
-    };
+    DefaultTableModel model;
 
-    TabelaSQL(){
-        updateColumnNames();
-        updateData();
-        model.setDataVector(daneTabeli, nazwyKolumnTabeli);
-        this.setModel(model);
+    TabelaSQL(boolean isCellEditable){
+        model = new DefaultTableModel(){
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return isCellEditable;
+            }
+        };
+        updateModel();
 
         PopUpMenuTabeli popUpMenuTabeli = new PopUpMenuTabeli(this);
     }
+
+
 
     private void updateColumnNames(){
         int liczbaKolumn = BazaDanych.getBazaDanych().getInformacjeOTabeli().getLiczbaKolumn();
@@ -37,6 +37,17 @@ abstract public class TabelaSQL extends JTable {
     }
 
     protected abstract void updateData();
+
+    public void updateModel(){
+        updateColumnNames();
+        updateData();
+
+
+        model.setDataVector(daneTabeli, nazwyKolumnTabeli);
+
+        this.setModel(model);
+    }
+
 
     class PopUpMenuTabeli extends JPopupMenu{
         private final PopUpMenuTabeli thisPopUpMenu = this;

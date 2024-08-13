@@ -3,6 +3,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.List;
 
 public class TabelaEdycji extends TabelaSQL {
     static DefaultTableModel model = new DefaultTableModel(){
@@ -11,29 +13,44 @@ public class TabelaEdycji extends TabelaSQL {
             return false;
         }
     };
+    List<Row> dodawaneDane;
 
     TabelaEdycji(){
+        super(false);
+
         updateModel();
         PopUpMenuTabeliEdycji popUpMenuTabeli = new PopUpMenuTabeliEdycji(this);
     }
 
     @Override
     protected void updateData() {
-        
-    }
-
-    public void updateModel(){
-        int liczbaKolumn = BazaDanych.getBazaDanych().getInformacjeOTabeli().getLiczbaKolumn();
-        String nazwyKolumn[] = new String[liczbaKolumn];
-        int i=0;
-        for(String nazwaKolumny: BazaDanych.getBazaDanych().getInformacjeOTabeli().getInformacjaOKolumnie(InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY)){
-            nazwyKolumn[i]=nazwaKolumny;
-            i++;
+        if(dodawaneDane==null){
+            dodawaneDane=new LinkedList<>();
         }
-        model.setDataVector(null, nazwyKolumn);
-        this.setModel(model);
 
+        Object[][] dane = new Object[dodawaneDane.size()][InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn()];
+        for(int j=0;j< dodawaneDane.size();j++){
+            for(int k=0;k<InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn();k++){
+                dane[j][k]=dodawaneDane.get(j).getPole(k).getWartosc();
+
+            }
+
+        }
+
+
+
+        super.daneTabeli=dane;
     }
+
+
+
+    public void dodajWiersz(Row wiersz){
+        dodawaneDane.add(wiersz);
+        super.updateModel();
+    }
+
+
+
 
     class PopUpMenuTabeliEdycji extends JPopupMenu{
         private final PopUpMenuTabeliEdycji thisPopUpMenu = this;

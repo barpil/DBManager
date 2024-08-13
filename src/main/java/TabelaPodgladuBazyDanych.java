@@ -13,13 +13,13 @@ public class TabelaPodgladuBazyDanych extends TabelaSQL {
     };
 
     TabelaPodgladuBazyDanych(){
-       super();
+       super(false);
        PopUpMenuTabeli popUpMenuTabeli = new PopUpMenuTabeli(this);
     }
 
     @Override
     protected void updateData() {
-        super.daneTabeli=BazaDanych.getBazaDanych().getData();
+        daneTabeli=BazaDanych.getBazaDanych().getData();
     }
 
 

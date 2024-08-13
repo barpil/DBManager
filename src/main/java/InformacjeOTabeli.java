@@ -9,24 +9,32 @@ import java.util.List;
 
 
 public class InformacjeOTabeli {
+
+
     enum InformacjeKolumny{
         NAZWA_KOLUMNY,
-        TYP_DANYCH_KOLUMNY
+        TYP_DANYCH_KOLUMNY,
+        IS_NULLABLE
     }
 
-    record Kolumna(String nazwaKolumny, String typDanych){
+    record Kolumna(String nazwaKolumny, String typDanych, String isNullable){
         String getInfo(InformacjeKolumny k){
             return switch (k){
                 case NAZWA_KOLUMNY -> this.nazwaKolumny;
                 case TYP_DANYCH_KOLUMNY -> this.typDanych;
+                case IS_NULLABLE -> this.isNullable;
+
             };
         }
     }
+
+    static InformacjeOTabeli informacjeOTabeli=null;
 
     private String kluczGlowny;
     private List<Kolumna> listaKolumn;
     private Connection connection;
     InformacjeOTabeli(Connection connection){
+        informacjeOTabeli=this;
         this.connection=connection;
         try {
             ustalKluczGlowny();
@@ -59,12 +67,12 @@ public class InformacjeOTabeli {
         Statement statement = null;
         try{
             statement = connection.createStatement();
-            String getKolumnyQuery ="SELECT COLUMN_NAME, DATA_TYPE " +
+            String getKolumnyQuery ="SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE " +
                     "FROM INFORMATION_SCHEMA.COLUMNS " +
                     "WHERE TABLE_NAME='"+BazaDanych.getBazaDanych().getNazwaTabeli()+"' AND TABLE_SCHEMA = '"+BazaDanych.getBazaDanych().getNazwaBazy()+"';";
             ResultSet resultSet= statement.executeQuery(getKolumnyQuery);
             while(resultSet.next()){
-                listaKolumn.add(new Kolumna(resultSet.getString("COLUMN_NAME"),resultSet.getString("DATA_TYPE")));
+                listaKolumn.add(new Kolumna(resultSet.getString("COLUMN_NAME"),resultSet.getString("DATA_TYPE"), resultSet.getString("IS_NULLABLE")));
             }
         }catch(SQLException _){
 
@@ -80,6 +88,11 @@ public class InformacjeOTabeli {
             lista.add(k.getInfo(informacjeKolumny));
         }
         return lista;
+    }
+
+    public static InformacjeOTabeli getInformacjeOTabeli() {
+        return informacjeOTabeli;
+
     }
 
     public String getInformacjaOKolumnie(int numerKolumny, InformacjeKolumny informacjeKolumny){
