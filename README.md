@@ -15,3 +15,8 @@ Zrobić aplikację okienkową, która pozwoli na:
 - [ ] Dostosowanie aplikacji do baz innych niż MySql
 - [ ] Zastanowienie się nad własnymi wyjątkami i czy są potrzebne
 - [ ] Refaktoryzacja kodu
+
+### Pomysły co dodać do projektu:
+- [ ] Przenisienie systemu usuwania wierszy calkowicie do zakladki edytuj tabele
+- [ ] Dodanie checkboxa w zakladce edytuj tabele pozwalający na przełączanie między
+      dodawanymi nowymi rekordami, a wszystkimi rekordami w bazie.

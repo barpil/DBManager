@@ -32,7 +32,6 @@ public class ThreadProgressBar extends JProgressBar {
     public void zwiekszProgress() {
 
         this.setValue(this.getValue() + progressUnit);
-        System.out.println(this.getValue());
         SwingUtilities.invokeLater(() ->{
             this.revalidate();
             this.repaint();

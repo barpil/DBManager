@@ -99,6 +99,14 @@ public class InformacjeOTabeli {
         return listaKolumn.get(numerKolumny).getInfo(informacjeKolumny);
     }
 
+    public String[] getNazwyKolumn(){
+        String[] nazwyKolumn = new String[getLiczbaKolumn()];
+        for(int i=0;i<getLiczbaKolumn();i++){
+            nazwyKolumn[i]=getInformacjaOKolumnie(i,InformacjeKolumny.NAZWA_KOLUMNY);
+        }
+        return nazwyKolumn;
+    }
+
     public int getLiczbaKolumn(){return listaKolumn.size();}
 
     public String getKluczGlowny(){return kluczGlowny;}

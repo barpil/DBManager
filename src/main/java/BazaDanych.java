@@ -64,41 +64,14 @@ public class BazaDanych {
 
     }
 
-    public void dodajDane(int id, String nazwa) throws SQLException { //Trzeba bedzie wymyslic inny mechanizm dodawania danych ktory bedzie mozliwy do korzystania dla dowolnej bazy
-        Statement statement = null;
-        try {
-            statement = connection.createStatement();
-            String insertQuery = "INSERT INTO users(idusers, nazwa)\n" +
-                    "VALUES (" + id + ",'" + nazwa + "');";
-            statement.execute(insertQuery);
-        } catch (SQLException e) {
-            throw new RuntimeException();
-        } finally {
-            assert statement != null;
-            statement.close();
-        }
-        zaktualizujBaze();
+    public void dodajDane(List<Row> dane) {
+        utworzWatek(new DBAddData(connection, dane));
     }
 
-    public void usunDane(int numerWiersza) throws SQLException { //Tez bedzie trzeba dostosowac dla dowolnej bazy
-        Statement statement = null;
-        try {
-            statement = connection.createStatement();
-            String kluczGlowny = informacjeOTabeli.getKluczGlowny();
-            String deleteQuery = "DELETE FROM "+nazwaTabeli+" WHERE "+kluczGlowny+"='" + dane.get(numerWiersza).getPole(kluczGlowny).getWartosc() + "';";
-            statement.execute(deleteQuery);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            assert statement != null;
-            statement.close();
-        }
-        zaktualizujBaze();
-        PanelElementow.zaladujTabele();
-    }
 
-    public void usunDane(int[] numeryWierszy) throws SQLException { //Tez bedzie trzeba dostosowac dla dowolnej bazy
-        utworzWatek(new DBDelete(connection, numeryWierszy));
+
+    public void usunDane(int[] numeryWierszy) {
+        utworzWatek(new DBDeleteData(connection, numeryWierszy));
 
     }
 

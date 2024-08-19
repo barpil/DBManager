@@ -1,10 +1,16 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public class OknoEdycjiTabeli extends JDialog {
 
-    OknoEdycjiTabeli(Frame frame, String nazwaOkna, boolean modal){
+    OknoEdycjiTabeli(Frame frame, String nazwaOkna, boolean modal) {
         super(frame, nazwaOkna, modal);
         this.setSize(new Dimension(400, 400));
         this.setResizable(true);
@@ -13,7 +19,9 @@ public class OknoEdycjiTabeli extends JDialog {
         this.setVisible(true);
     }
 
-    private void dodajComponenty(){
+    private void dodajComponenty() {
+
+
         JPanel panelGlowny = new JPanel();
         panelGlowny.setLayout(new BoxLayout(panelGlowny, BoxLayout.Y_AXIS));
 
@@ -28,20 +36,19 @@ public class OknoEdycjiTabeli extends JDialog {
         panelDodawaniaWierszy.setLayout(new BoxLayout(panelDodawaniaWierszy, BoxLayout.X_AXIS));
         panelDodawaniaWierszy.setPreferredSize(new Dimension(400, 50));
 
-        class TabelaDodawaniaWierszy extends TabelaSQL{
+        class TabelaDodawaniaWierszy extends TabelaSQL {
 
-            TabelaDodawaniaWierszy(){
+            TabelaDodawaniaWierszy() {
                 super(true);
             }
 
             @Override
             protected void updateData() {
-                daneTabeli= new Object[1][nazwyKolumnTabeli.length];
-                for(int i=0; i<nazwyKolumnTabeli.length;i++){
-                    daneTabeli[0][i]=null;
+                daneTabeli = new Object[1][nazwyKolumnTabeli.length];
+                for (int i = 0; i < nazwyKolumnTabeli.length; i++) {
+                    daneTabeli[0][i] = null;
                 }
             }
-
 
 
             private void wyczyscWiersz() {
@@ -53,17 +60,16 @@ public class OknoEdycjiTabeli extends JDialog {
                 if (this.isEditing()) {
                     this.getCellEditor().stopCellEditing();
                 }
-                for(int i=0; i<InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn();i++){
-                    dodawanyWiersz.addPole(InformacjeOTabeli.getInformacjeOTabeli().getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY), this.getModel().getValueAt(0,i));
+                for (int i = 0; i < InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn(); i++) {
+                    dodawanyWiersz.addPole(InformacjeOTabeli.getInformacjeOTabeli().getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY), this.getModel().getValueAt(0, i));
 
                 }
 
                 tabelaPodgladu.dodajWiersz(dodawanyWiersz);
             }
+
+
         }
-
-
-
 
 
         JScrollPane dolnyScrollPane = new JScrollPane();
@@ -95,18 +101,126 @@ public class OknoEdycjiTabeli extends JDialog {
 
         panelGlowny.add(panelDodawaniaWierszy);
 
+        JPanel panelPrzyciskowOkna = new JPanel();
+        panelPrzyciskowOkna.setLayout(new BoxLayout(panelPrzyciskowOkna,BoxLayout.X_AXIS));
+        panelPrzyciskowOkna.setPreferredSize(new Dimension(400,30));
+        panelPrzyciskowOkna.add(Box.createHorizontalGlue());
+        JButton applyButton = new JButton("Apply");
+        applyButton.setPreferredSize(new Dimension(60,20));
+        applyButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+        applyButton.addActionListener(e -> {
+            BazaDanych.getBazaDanych().dodajDane(tabelaPodgladu.getData());
+            BazaDanych.getBazaDanych().getSqlThreadQueue().rozpocznijWykonywanie();
+            this.dispose();
+        });
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.setPreferredSize(new Dimension(60,20));
+        cancelButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+        cancelButton.addActionListener(e -> {
+            this.dispose();
+        });
+        panelPrzyciskowOkna.add(applyButton);
+        panelPrzyciskowOkna.add(Box.createRigidArea(new Dimension(10,0)));
+        panelPrzyciskowOkna.add(cancelButton);
+        panelPrzyciskowOkna.add(Box.createRigidArea(new Dimension(5,0)));
+
+        panelGlowny.add(panelPrzyciskowOkna);
+
         this.add(panelGlowny);
+    }
+}
+
+
+
+class TabelaEdycji extends TabelaSQL {
+    static DefaultTableModel model = new DefaultTableModel(){
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
+    List<Row> dodawaneDane;
+
+    TabelaEdycji(){
+        super(false);
+
+        updateModel();
+        PopUpMenuTabeliEdycji popUpMenuTabeli = new PopUpMenuTabeliEdycji(this);
+    }
+
+    @Override
+    protected void updateData() {
+        if(dodawaneDane==null){
+            dodawaneDane=new LinkedList<>();
+        }
+
+        Object[][] dane = new Object[dodawaneDane.size()][InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn()];
+        for(int j=0;j< dodawaneDane.size();j++){
+            for(int k=0;k<InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn();k++){
+                dane[j][k]=dodawaneDane.get(j).getPole(k).getWartosc();
+
+            }
+
+        }
+
+
+
+        super.daneTabeli=dane;
     }
 
 
 
+    public void dodajWiersz(Row wiersz){
+        dodawaneDane.add(wiersz);
+        super.updateModel();
+    }
+
+    public void usunWiersz(int[] numeryWierszy){
+        for(int numerWiersza: numeryWierszy){
+            dodawaneDane.remove(numerWiersza);
+        }
+        super.updateModel();
+
+    }
+
+
+public List<Row> getData(){
+        return dodawaneDane;
+}
+
+
+    class PopUpMenuTabeliEdycji extends JPopupMenu{
+        private final PopUpMenuTabeliEdycji thisPopUpMenu = this;
+        PopUpMenuTabeliEdycji(TabelaEdycji tabela){
+
+            JMenuItem deleteRows = new JMenuItem("Delete rows");
+            deleteRows.addActionListener(e -> {
+
+                int[] selectedRows = tabela.getSelectedRows();
+                tabela.usunWiersz(selectedRows);
+            });
 
 
 
+            this.add(deleteRows);
+
+            tabela.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    if(e.isPopupTrigger() && tabela.getSelectedRows().length>0){
+                        thisPopUpMenu.show(e.getComponent(), e.getX(), e.getY());
+                    }
+                }
 
 
+            });
+        }
+    }
 
 
 
 }
+
+
+
 

@@ -3,9 +3,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
-public class DBDelete extends DBConnector implements SQLRunnable{
+public class DBDeleteData extends DBConnector implements SQLRunnable{
     int[] numeryWierszy;
-    DBDelete(Connection connection, int[] numeryWierszy) {
+    DBDeleteData(Connection connection, int[] numeryWierszy) {
         super(connection);
         this.numeryWierszy = numeryWierszy;
     }
@@ -43,11 +43,6 @@ public class DBDelete extends DBConnector implements SQLRunnable{
 
     @Override
     public void poinformujOZakonczeniuWatku() {
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        BazaDanych.getBazaDanych().getSqlThreadQueue().zakonczonoWatek();
+        SQLRunnable.super.poinformujOZakonczeniuWatku();
     }
 }

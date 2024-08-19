@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class SQLThreadQueue {
-    final int LICZBA_OBSLUGIWANYCH_WATKOW = 2;
+    final int LICZBA_OBSLUGIWANYCH_WATKOW = 2; //Mozna dodac do config file'a liczbe obslugiwanych watkow
 
     private int liczbaZajetychWatkow = 0;
     private final Queue<Thread> threadQueue = new LinkedList<>();
@@ -19,7 +19,6 @@ public class SQLThreadQueue {
     public synchronized void rozpocznijWykonywanie() {
         progressBar = PanelSterowania.getPanelSterowania().getProgressBar();
         progressBar.przygotujProgressBar();
-        dodajWatek(new WatekTestowy());
 
         Thread thread = new Thread(() -> {
             if (!threadQueue.isEmpty()) {
@@ -45,38 +44,21 @@ public class SQLThreadQueue {
                         }
                     }
                 }
-                while(liczbaZajetychWatkow != 0) {
-                    System.out.println("Oczekuje na zakończenie wątków...");
-                    synchronized (lock){
-                        try {
-                            lock.wait();
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                }
-            }
-        });
 
-        thread.start();
-        new Thread(() -> {
-            while(thread.isAlive()) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
             }
 
-            SwingUtilities.invokeLater(() -> {
                 try {
+                    System.out.println("Zakonczono wątki. Liczba pozostalych watkow: "+liczbaPozostalychWatkow());
                     BazaDanych.getBazaDanych().zaktualizujBaze();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
                 PanelElementow.zaladujTabele();
             });
-        }).start();
+
+
+        thread.start();
+
     }
 
     public void zakonczonoWatek() {
