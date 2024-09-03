@@ -110,7 +110,6 @@ public class OknoEdycjiTabeli extends JDialog {
         applyButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
         applyButton.addActionListener(e -> {
             BazaDanych.getBazaDanych().dodajDane(tabelaPodgladu.getData());
-            BazaDanych.getBazaDanych().getSqlThreadQueue().rozpocznijWykonywanie();
             this.dispose();
         });
         JButton cancelButton = new JButton("Cancel");

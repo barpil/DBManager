@@ -56,7 +56,6 @@ public class DBAddData extends DBConnector implements SQLRunnable{
                     insertQuery+=";";
                 }
             }
-            System.out.println(insertQuery);
             statement.execute(insertQuery);
         } catch (SQLException e) {
             throw new RuntimeException();
@@ -68,5 +67,7 @@ public class DBAddData extends DBConnector implements SQLRunnable{
                 throw new RuntimeException(e);
             }
         }
+        poinformujOZakonczeniuWatku();
     }
+
 }

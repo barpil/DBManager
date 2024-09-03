@@ -15,6 +15,7 @@ public class TabelaPodgladuBazyDanych extends TabelaSQL {
     TabelaPodgladuBazyDanych(){
        super(false);
        PopUpMenuTabeli popUpMenuTabeli = new PopUpMenuTabeli(this);
+       this.repaint();
     }
 
     @Override
@@ -29,11 +30,8 @@ public class TabelaPodgladuBazyDanych extends TabelaSQL {
 
             JMenuItem deleteRows = new JMenuItem("Delete rows");
             deleteRows.addActionListener(e -> {
-                try {
-                    BazaDanych.getBazaDanych().usunDane(tabelaPodgladuBazyDanych.getSelectedRows());
-                } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
-                }
+                BazaDanych.getBazaDanych().usunDane(tabelaPodgladuBazyDanych.getSelectedRows());
+
             });
 
 

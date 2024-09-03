@@ -23,10 +23,12 @@ public class ThreadProgressBar extends JProgressBar {
     }
 
     public void przygotujProgressBar() {
-        this.setVisible(true);
-        this.setValue(MIN_VALUE);
-        progressUnit = MAX_VALUE / BazaDanych.getBazaDanych().getSqlThreadQueue().liczbaPozostalychWatkow();
-        this.repaint();
+        if (BazaDanych.getBazaDanych().getSqlThreadQueue().liczbaPozostalychWatkow()!=0) {
+            this.setVisible(true);
+            this.setValue(MIN_VALUE);
+            progressUnit = MAX_VALUE / BazaDanych.getBazaDanych().getSqlThreadQueue().liczbaPozostalychWatkow();
+            this.repaint();
+        }
     }
 
     public void zwiekszProgress() {
@@ -45,8 +47,6 @@ public class ThreadProgressBar extends JProgressBar {
 
             }
         });
-
-
 
     }
 }

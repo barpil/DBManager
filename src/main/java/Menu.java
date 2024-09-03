@@ -69,6 +69,7 @@ public class Menu extends JMenuBar {
 
     private void edytujTabele() {
         OknoEdycjiTabeli oknoEdytowaniaTabeli = new OknoEdycjiTabeli(OknoGlowne.getOknoGlowne(), "Edytuj tabelę", true);
+        BazaDanych.getBazaDanych().getSqlThreadQueue().rozpocznijWykonywanie();
 
     }
 

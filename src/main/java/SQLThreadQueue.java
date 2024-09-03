@@ -48,12 +48,18 @@ public class SQLThreadQueue {
             }
 
                 try {
+                    progressBar.setValue(progressBar.getMaximum());
                     System.out.println("Zakonczono wątki. Liczba pozostalych watkow: "+liczbaPozostalychWatkow());
+
                     BazaDanych.getBazaDanych().zaktualizujBaze();
+                    PanelElementow.zaladujTabele();
+
+
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
-                PanelElementow.zaladujTabele();
+
+
             });
 
 

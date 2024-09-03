@@ -55,11 +55,8 @@ abstract public class TabelaSQL extends JTable {
 
             JMenuItem deleteRows = new JMenuItem("Delete rows");
             deleteRows.addActionListener(e -> {
-                try {
-                    BazaDanych.getBazaDanych().usunDane(tabela.getSelectedRows());
-                } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
-                }
+                BazaDanych.getBazaDanych().usunDane(tabela.getSelectedRows());
+
             });
 
 

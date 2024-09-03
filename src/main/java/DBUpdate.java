@@ -26,7 +26,7 @@ public class DBUpdate extends DBConnector implements Runnable{
                         String nazwaKolumny = informacjeOTabeli.getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY);
                         switch (informacjeOTabeli.getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.TYP_DANYCH_KOLUMNY)) {
                             case "int":
-                                dodawanyRzad.addPole(nazwaKolumny, Integer.parseInt(resultSet.getString(nazwaKolumny)));
+                                dodawanyRzad.addPole(nazwaKolumny, resultSet.getInt(nazwaKolumny));
                                 break;
                             case "varchar":
                                 dodawanyRzad.addPole(nazwaKolumny, resultSet.getString(nazwaKolumny));
