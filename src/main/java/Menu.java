@@ -26,18 +26,18 @@ public class Menu extends JMenuBar {
     }
 
     public void dodajOpcjeBazyDanych() {
-        JMenuItem zaktualizujIdMI = new JMenuItem("Zaktualizuj ID");
         JMenuItem edytujTabeleMI = new JMenuItem("Edytuj tabelę");
         edytujTabeleMI.addActionListener(e -> edytujTabele());
-
+        JMenuItem sqlConsoleMI = new JMenuItem("SQL console");
+        sqlConsoleMI.addActionListener(e -> otworzKonsoleSQL());
         menuGlowne.add(edytujTabeleMI);
         JMenu sortujWyniki = new JMenu("Sortuj...");
         menuGlowne.add(sortujWyniki);
+        menuGlowne.add(sqlConsoleMI);
         JMenu sortujASC = new JMenu("ASC");
         JMenu sortujDESC = new JMenu("DESC");
         sortujWyniki.add(sortujASC);
         sortujWyniki.add(sortujDESC);
-
         InformacjeOTabeli informacjeOTabeli = BazaDanych.getBazaDanych().getInformacjeOTabeli();
 
         List<String> listaKolumn = informacjeOTabeli.getInformacjaOKolumnie(InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY);
@@ -64,6 +64,10 @@ public class Menu extends JMenuBar {
             sortujDESC.add(przyciskKolumnyDESC);
 
         }
+    }
+
+    private void otworzKonsoleSQL() {
+        SQLConsole sqlConsole = new SQLConsole(OknoGlowne.getOknoGlowne(), "SQL console", false);
     }
 
     private void edytujTabele() {

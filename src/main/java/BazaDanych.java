@@ -75,6 +75,10 @@ public class BazaDanych {
 
     }
 
+    public void customSQLCommand(String textCommand){
+        utworzWatek(new DBCustomSQLCommand(connection, textCommand));
+    }
+
     public void sortujDane(String by, String order) throws SQLException {
         Statement statement = null;
         dane.clear();
