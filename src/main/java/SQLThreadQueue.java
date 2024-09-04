@@ -81,4 +81,9 @@ public class SQLThreadQueue {
     public int liczbaPozostalychWatkow() {
         return threadQueue.size();
     }
+
+    public void resetQueue(){
+        threadQueue.clear();
+        System.out.println("Kolejka watkow wyczyszczona");
+    }
 }

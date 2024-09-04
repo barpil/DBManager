@@ -31,12 +31,7 @@ public class PanelSterowania extends JPanel {
 
 
         this.add(Box.createVerticalGlue());
-        przyciskRozpoczecia= new Button("Start");
-        przyciskRozpoczecia.addActionListener(e -> {
-            BazaDanych.getBazaDanych().getSqlThreadQueue().rozpocznijWykonywanie();
-            System.out.println("Klik");
-        });
-        this.add(przyciskRozpoczecia);
+
         panelProgressBara = new JPanel();
         panelProgressBara.setBackground(Color.MAGENTA);
         this.add(panelProgressBara);

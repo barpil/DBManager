@@ -27,10 +27,9 @@ public class Menu extends JMenuBar {
 
     public void dodajOpcjeBazyDanych() {
         JMenuItem zaktualizujIdMI = new JMenuItem("Zaktualizuj ID");
-        zaktualizujIdMI.addActionListener(e -> BazaDanych.getBazaDanych().zaktualizujID());
         JMenuItem edytujTabeleMI = new JMenuItem("Edytuj tabelę");
         edytujTabeleMI.addActionListener(e -> edytujTabele());
-        menuGlowne.add(zaktualizujIdMI);
+
         menuGlowne.add(edytujTabeleMI);
         JMenu sortujWyniki = new JMenu("Sortuj...");
         menuGlowne.add(sortujWyniki);
@@ -69,7 +68,12 @@ public class Menu extends JMenuBar {
 
     private void edytujTabele() {
         OknoEdycjiTabeli oknoEdytowaniaTabeli = new OknoEdycjiTabeli(OknoGlowne.getOknoGlowne(), "Edytuj tabelę", true);
-        BazaDanych.getBazaDanych().getSqlThreadQueue().rozpocznijWykonywanie();
+        try {
+            BazaDanych.getBazaDanych().zaktualizujBaze();
+            PanelElementow.zaladujTabele();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 

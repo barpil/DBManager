@@ -91,7 +91,7 @@ public class BazaDanych {
                         String nazwaKolumny = informacjeOTabeli.getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY);
                         switch (informacjeOTabeli.getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.TYP_DANYCH_KOLUMNY)) {
                             case "int":
-                                dodawanyRzad.addPole(nazwaKolumny, Integer.parseInt(resultSet.getString(nazwaKolumny)));
+                                dodawanyRzad.addPole(nazwaKolumny, resultSet.getInt(nazwaKolumny));
                                 break;
                             case "varchar":
                                 dodawanyRzad.addPole(nazwaKolumny, resultSet.getString(nazwaKolumny));
@@ -112,25 +112,6 @@ public class BazaDanych {
 
     }
 
-    public void zaktualizujID() {
-
-        Statement statement = null;
-        try {
-            zaktualizujBaze();
-            statement = connection.createStatement();
-            String kluczGlowny = informacjeOTabeli.getKluczGlowny();
-            for (int nr = 1; nr < getDane().size() + 1; nr++) {
-                if (nr != (int) getDane().get(nr - 1).getPole(0).getWartosc()) {
-                    String updateIDQuery = "UPDATE USERS SET " + kluczGlowny + " = " + nr + " WHERE " + kluczGlowny + " = " + getDane().get(nr - 1).getPole(0).getWartosc() + ";";
-                    statement.execute(updateIDQuery);
-                }
-            }
-            zaktualizujBaze();
-            PanelElementow.zaladujTabele();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     public static void ustawBaze(String nazwaSerwera, String port, String nazwaBazy, String nazwaUzytkownika, String hasloUzytkownika) throws SQLException {
         bazaDanych = new BazaDanych(nazwaSerwera, port, nazwaBazy, nazwaUzytkownika, hasloUzytkownika);

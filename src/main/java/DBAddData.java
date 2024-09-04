@@ -17,6 +17,9 @@ public class DBAddData extends DBConnector implements SQLRunnable{
 
     @Override
     public void run() {
+        if(dodawaneDane.size()==0){
+            return;
+        }
         Statement statement = null;
         try {
             statement = connection.createStatement();
@@ -56,6 +59,7 @@ public class DBAddData extends DBConnector implements SQLRunnable{
                     insertQuery+=";";
                 }
             }
+            
             statement.execute(insertQuery);
         } catch (SQLException e) {
             throw new RuntimeException();

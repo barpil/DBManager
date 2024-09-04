@@ -20,7 +20,7 @@ abstract public class TabelaSQL extends JTable {
         };
         updateModel();
 
-        PopUpMenuTabeli popUpMenuTabeli = new PopUpMenuTabeli(this);
+
     }
 
 
@@ -49,29 +49,4 @@ abstract public class TabelaSQL extends JTable {
     }
 
 
-    class PopUpMenuTabeli extends JPopupMenu{
-        private final PopUpMenuTabeli thisPopUpMenu = this;
-        PopUpMenuTabeli(TabelaSQL tabela){
-
-            JMenuItem deleteRows = new JMenuItem("Delete rows");
-            deleteRows.addActionListener(e -> {
-                BazaDanych.getBazaDanych().usunDane(tabela.getSelectedRows());
-
-            });
-
-
-            this.add(deleteRows);
-
-            tabela.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    if(e.isPopupTrigger() && tabela.getSelectedRows().length>0){
-                        thisPopUpMenu.show(e.getComponent(), e.getX(), e.getY());
-                    }
-                }
-
-
-            });
-        }
-    }
 }

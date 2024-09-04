@@ -1,15 +1,14 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 public class OknoEdycjiTabeli extends JDialog {
-
+    TabelaEdycji tabelaPodgladu;
     OknoEdycjiTabeli(Frame frame, String nazwaOkna, boolean modal) {
         super(frame, nazwaOkna, modal);
         this.setSize(new Dimension(400, 400));
@@ -20,13 +19,48 @@ public class OknoEdycjiTabeli extends JDialog {
     }
 
     private void dodajComponenty() {
+        this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (!tabelaPodgladu.dodawaneDane.isEmpty() || BazaDanych.getBazaDanych().getSqlThreadQueue().liczbaPozostalychWatkow()!=0) {
+                    int potwierdzenieZamkniecia = JOptionPane.showConfirmDialog(
+                            OknoEdycjiTabeli.this,
+                            "Do you want to discard the changes?",
+                            "Unsaved changes",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.QUESTION_MESSAGE
+                    );
 
+                    if (potwierdzenieZamkniecia == JOptionPane.YES_OPTION) {
+                        BazaDanych.getBazaDanych().getSqlThreadQueue().resetQueue();
+                        OknoEdycjiTabeli.this.dispose();
+                    }
+                }else{
+                    OknoEdycjiTabeli.this.dispose();
+                }
+            }
+        });
 
         JPanel panelGlowny = new JPanel();
         panelGlowny.setLayout(new BoxLayout(panelGlowny, BoxLayout.Y_AXIS));
 
+        JPanel topButtonPanel = new JPanel();
+        topButtonPanel.setLayout(new BoxLayout(topButtonPanel, BoxLayout.X_AXIS));
+        JLabel showNewOnlyLabel = new JLabel("New only");
+        JCheckBox showNewOnlyCheckbox = new JCheckBox();
+        MyItemListener myItemListener = new MyItemListener();
+        showNewOnlyCheckbox.addItemListener(myItemListener);
+
+        topButtonPanel.add(Box.createHorizontalGlue());
+        topButtonPanel.add(showNewOnlyLabel);
+        topButtonPanel.add(showNewOnlyCheckbox);
+
+        panelGlowny.add(topButtonPanel);
+
+
         JScrollPane scrollPane = new JScrollPane();
-        TabelaEdycji tabelaPodgladu = new TabelaEdycji();
+        tabelaPodgladu = new TabelaEdycji();
         scrollPane.setViewportView(tabelaPodgladu);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
@@ -105,17 +139,27 @@ public class OknoEdycjiTabeli extends JDialog {
         panelPrzyciskowOkna.setLayout(new BoxLayout(panelPrzyciskowOkna,BoxLayout.X_AXIS));
         panelPrzyciskowOkna.setPreferredSize(new Dimension(400,30));
         panelPrzyciskowOkna.add(Box.createHorizontalGlue());
+
         JButton applyButton = new JButton("Apply");
         applyButton.setPreferredSize(new Dimension(60,20));
         applyButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
         applyButton.addActionListener(e -> {
             BazaDanych.getBazaDanych().dodajDane(tabelaPodgladu.getData());
+            BazaDanych.getBazaDanych().getSqlThreadQueue().rozpocznijWykonywanie();
+            while(BazaDanych.getBazaDanych().getSqlThreadQueue().liczbaPozostalychWatkow()!=0){
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
             this.dispose();
         });
         JButton cancelButton = new JButton("Cancel");
         cancelButton.setPreferredSize(new Dimension(60,20));
         cancelButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
         cancelButton.addActionListener(e -> {
+            BazaDanych.getBazaDanych().getSqlThreadQueue().resetQueue();
             this.dispose();
         });
         panelPrzyciskowOkna.add(applyButton);
@@ -126,6 +170,19 @@ public class OknoEdycjiTabeli extends JDialog {
         panelGlowny.add(panelPrzyciskowOkna);
 
         this.add(panelGlowny);
+    }
+
+    class MyItemListener implements ItemListener {
+        public void itemStateChanged(ItemEvent e) {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                tabelaPodgladu.setOnlyNewOption(true);
+                System.out.println("Feature is enabled.");
+            } else {
+                tabelaPodgladu.setOnlyNewOption(false);
+                System.out.println("Feature is disabled.");
+            }
+            tabelaPodgladu.updateModel();
+        }
     }
 }
 
@@ -139,35 +196,55 @@ class TabelaEdycji extends TabelaSQL {
         }
     };
     List<Row> dodawaneDane;
+    List<Row> daneBazy;
+    private boolean onlyNewOption = false;
 
     TabelaEdycji(){
         super(false);
-
+        daneBazy=new LinkedList<>();
+        daneBazy.addAll(BazaDanych.getBazaDanych().getDane());
+        System.out.println(daneBazy);
         updateModel();
         PopUpMenuTabeliEdycji popUpMenuTabeli = new PopUpMenuTabeliEdycji(this);
     }
 
     @Override
     protected void updateData() {
+        if(daneBazy==null){
+            return;
+        }
         if(dodawaneDane==null){
             dodawaneDane=new LinkedList<>();
         }
-
-        Object[][] dane = new Object[dodawaneDane.size()][InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn()];
-        for(int j=0;j< dodawaneDane.size();j++){
-            for(int k=0;k<InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn();k++){
-                dane[j][k]=dodawaneDane.get(j).getPole(k).getWartosc();
-
+        Object[][] dane;
+        if(onlyNewOption){
+            dane = new Object[dodawaneDane.size()][InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn()];
+            for(int j=0;j< dodawaneDane.size();j++){
+                for(int k=0;k<InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn();k++){
+                    dane[j][k]=dodawaneDane.get(j).getPole(k).getWartosc();
+                }
             }
-
         }
-
-
+        else{
+            dane = new Object[dodawaneDane.size()+daneBazy.size()][InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn()];
+            for(int j=0;j<daneBazy.size();j++){
+                for(int k=0;k<InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn();k++){
+                    dane[j][k]=daneBazy.get(j).getPole(k).getWartosc();
+                }
+            }
+            for(int j=0;j< dodawaneDane.size();j++){
+                for(int k=0;k<InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn();k++){
+                    dane[j+daneBazy.size()][k]=dodawaneDane.get(j).getPole(k).getWartosc();
+                }
+            }
+        }
 
         super.daneTabeli=dane;
     }
 
-
+    protected void setOnlyNewOption(boolean b){
+        this.onlyNewOption=b;
+    }
 
     public void dodajWiersz(Row wiersz){
         dodawaneDane.add(wiersz);
@@ -176,10 +253,16 @@ class TabelaEdycji extends TabelaSQL {
 
     public void usunWiersz(int[] numeryWierszy){
         for(int numerWiersza: numeryWierszy){
-            dodawaneDane.remove(numerWiersza);
+            if(onlyNewOption){
+                dodawaneDane.remove(numerWiersza);
+            } else if(numerWiersza>daneBazy.size()){
+                dodawaneDane.remove(daneTabeli.length-numerWiersza-1);
+            }else{
+                daneBazy.remove(numerWiersza);
+            }
+
         }
         super.updateModel();
-
     }
 
 
@@ -196,7 +279,34 @@ public List<Row> getData(){
             deleteRows.addActionListener(e -> {
 
                 int[] selectedRows = tabela.getSelectedRows();
-                tabela.usunWiersz(selectedRows);
+
+                //Zalozenie zeby to dzialalo to nieistnienie sortowania tej tabeli
+                List<Integer> listaDoUsunieciaZBazy = new LinkedList<>();
+                List<Integer> listaDoUsunieciaZNowych = new LinkedList<>();
+                for(int row: selectedRows){
+                    if(row<BazaDanych.getBazaDanych().getDane().size()){
+                        listaDoUsunieciaZBazy.add(row);
+                    }else{
+                        listaDoUsunieciaZNowych.add(row);
+                    }
+                }
+                int[] t = new int[listaDoUsunieciaZNowych.size()];
+
+                for(int i=0;i<listaDoUsunieciaZNowych.size();i++){
+                    t[i]=listaDoUsunieciaZNowych.get(i);
+                }
+                if (t.length!=0) {
+                    usunWiersz(t);
+                }
+                t=new int[listaDoUsunieciaZBazy.size()];
+                for(int i=0;i<listaDoUsunieciaZBazy.size();i++){
+                    t[i]=listaDoUsunieciaZBazy.get(i);
+                }
+                if (t.length!=0) {
+                    usunWiersz(t);
+                    BazaDanych.getBazaDanych().usunDane(t);
+                }
+
             });
 
 
