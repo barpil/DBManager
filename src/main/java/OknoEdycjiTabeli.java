@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
@@ -87,17 +88,49 @@ public class OknoEdycjiTabeli extends JDialog {
                 updateModel();
             }
 
+            class ZaznaczaczNieuzupelnionychPol extends DefaultTableCellRenderer
+            {
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
+                {
+                    Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                    setBackground(Color.red);
+                    return c;
+                }
+            }
+
             private void dodajWiersz() {
                 Row dodawanyWiersz = new Row(InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn());
                 if (this.isEditing()) {
                     this.getCellEditor().stopCellEditing();
                 }
+
                 for (int i = 0; i < InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn(); i++) {
                     dodawanyWiersz.addPole(InformacjeOTabeli.getInformacjeOTabeli().getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY), this.getModel().getValueAt(0, i));
+                }
+
+                List<Integer> listaNiewypelnionych = new LinkedList<>();
+                for(int i=0;i<dodawanyWiersz.listaPol.size();i++){
+                    if(InformacjeOTabeli.getInformacjeOTabeli().getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.IS_NULLABLE).equals("NO") && dodawanyWiersz.getPole(i).getWartosc()==null){
+                        listaNiewypelnionych.add(i);
+                    }
+                }
+                if (listaNiewypelnionych.isEmpty()) {
+                    tabelaPodgladu.dodajWiersz(dodawanyWiersz);
+                }
+                else{
+                    String wiadomosc="Following fields must be filled:";
+                    for(Integer i: listaNiewypelnionych){
+                        wiadomosc+="\n"+dodawanyWiersz.getPole(i).getNazwaKolumny();
+                        this.getColumnModel().getColumn(i).setCellRenderer(new ZaznaczaczNieuzupelnionychPol());
+                    }
+                    this.repaint();
+                    JOptionPane.showMessageDialog(OknoEdycjiTabeli.this, wiadomosc, "Unfilled fields", JOptionPane.INFORMATION_MESSAGE);
 
                 }
 
-                tabelaPodgladu.dodajWiersz(dodawanyWiersz);
+
+
             }
 
 
@@ -114,18 +147,41 @@ public class OknoEdycjiTabeli extends JDialog {
 
         JPanel panelPrzyciskow = new JPanel();
         panelPrzyciskow.setLayout(new BoxLayout(panelPrzyciskow, BoxLayout.Y_AXIS));
-        Button dodajWierszBtn = new Button("+");
 
+        Dimension wielkoscPrzycisku = new Dimension(40,25);
+
+        JButton wyczyscWierszBtn = new JButton("Clear");
+        wyczyscWierszBtn.setPreferredSize(wielkoscPrzycisku);
+        wyczyscWierszBtn.setMinimumSize(wielkoscPrzycisku);
+        wyczyscWierszBtn.setMaximumSize(wielkoscPrzycisku);
+        wyczyscWierszBtn.setMargin(new Insets(1,1,1,1));
+        wyczyscWierszBtn.addActionListener(e -> {
+            tabelaDodawaniaWierszy.wyczyscWiersz();
+        });
+
+        JButton dodajWierszBtn = new JButton("+");
+        dodajWierszBtn.setPreferredSize(wielkoscPrzycisku);
+        dodajWierszBtn.setMinimumSize(wielkoscPrzycisku);
+        dodajWierszBtn.setMaximumSize(wielkoscPrzycisku);
+        dodajWierszBtn.setMargin(new Insets(1,1,1,1));
         dodajWierszBtn.addActionListener(e -> {
             tabelaDodawaniaWierszy.dodajWiersz();
             tabelaDodawaniaWierszy.wyczyscWiersz();
         });
-        panelPrzyciskow.add(dodajWierszBtn);
 
-        Button wyczyscWierszBtn = new Button("Clear");
-        wyczyscWierszBtn.addActionListener(e -> {
-            tabelaDodawaniaWierszy.wyczyscWiersz();
+        InputMap inputMap = tabelaDodawaniaWierszy.getInputMap(JComponent.WHEN_FOCUSED);
+        ActionMap actionMap = tabelaDodawaniaWierszy.getActionMap();
+        KeyStroke keyStroke = KeyStroke.getKeyStroke("control ENTER");
+        inputMap.put(keyStroke, "dodajWierszButton");
+
+        actionMap.put("dodajWierszButton", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dodajWierszBtn.doClick();
+            }
         });
+
+        panelPrzyciskow.add(dodajWierszBtn);
         panelPrzyciskow.add(wyczyscWierszBtn);
 
 
@@ -139,6 +195,10 @@ public class OknoEdycjiTabeli extends JDialog {
         panelPrzyciskowOkna.add(Box.createHorizontalGlue());
 
         JButton applyButton = new JButton("Apply");
+
+        //Zrobic sprawdzanie czy pola ktora sa w bazie oznaczone jako not null sa napewno uzupelnione
+
+
         applyButton.setPreferredSize(new Dimension(60,20));
         applyButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
         applyButton.addActionListener(e -> {
@@ -244,6 +304,7 @@ class TabelaEdycji extends TabelaSQL {
         this.onlyNewOption=b;
     }
 
+
     public void dodajWiersz(Row wiersz){
         dodawaneDane.add(wiersz);
         super.updateModel();
@@ -251,22 +312,31 @@ class TabelaEdycji extends TabelaSQL {
 
     public void usunWiersz(int[] numeryWierszy){
         for(int numerWiersza: numeryWierszy){
+            System.out.println("Usuwany wiersz: "+numerWiersza);
             if(onlyNewOption){
                 dodawaneDane.remove(numerWiersza);
-            } else if(numerWiersza>daneBazy.size()){
-                dodawaneDane.remove(daneTabeli.length-numerWiersza-1);
-            }else{
-                daneBazy.remove(numerWiersza);
+            } else{
+                if(numerWiersza<daneBazy.size()){
+                    daneBazy.remove(numerWiersza);
+
+                }else{
+                    dodawaneDane.remove(daneTabeli.length-numerWiersza-1);
+                }
             }
 
         }
         super.updateModel();
+
+
     }
 
 
 public List<Row> getData(){
         return dodawaneDane;
 }
+
+
+
 
 
     class PopUpMenuTabeliEdycji extends JPopupMenu{
@@ -282,7 +352,7 @@ public List<Row> getData(){
                 List<Integer> listaDoUsunieciaZBazy = new LinkedList<>();
                 List<Integer> listaDoUsunieciaZNowych = new LinkedList<>();
                 for(int row: selectedRows){
-                    if(row<BazaDanych.getBazaDanych().getDane().size()){
+                    if(row<daneBazy.size() && !onlyNewOption){
                         listaDoUsunieciaZBazy.add(row);
                     }else{
                         listaDoUsunieciaZNowych.add(row);
@@ -300,8 +370,12 @@ public List<Row> getData(){
                 for(int i=0;i<listaDoUsunieciaZBazy.size();i++){
                     t[i]=listaDoUsunieciaZBazy.get(i);
                 }
+
+
+                System.out.println();
                 if (t.length!=0) {
                     usunWiersz(t);
+
                     BazaDanych.getBazaDanych().usunDane(t);
                 }
 

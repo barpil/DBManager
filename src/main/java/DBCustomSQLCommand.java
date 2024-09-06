@@ -16,7 +16,7 @@ public class DBCustomSQLCommand extends DBConnector implements SQLRunnable {
             statement = connection.createStatement();
             statement.execute(textCommand);
         } catch (SQLException e) {
-            throw new RuntimeException();
+            SQLConsole.poinformujOBledzie();
         } finally {
             assert statement != null;
             try {

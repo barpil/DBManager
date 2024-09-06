@@ -1,5 +1,6 @@
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -75,7 +76,7 @@ public class BazaDanych {
 
     }
 
-    public void customSQLCommand(String textCommand){
+    public void customSQLCommand(SQLConsole okno, String textCommand){
         utworzWatek(new DBCustomSQLCommand(connection, textCommand));
     }
 
@@ -172,7 +173,7 @@ public class BazaDanych {
 
 }
 
-class Row {
+class Row implements Iterable<Pole<?>>{
 
 
     List<Pole<?>> listaPol;
@@ -213,6 +214,28 @@ class Row {
 
     public <T> void addPole(String nazwaKolumny, T wartosc) {
         listaPol.add(new Pole<>(nazwaKolumny, wartosc));
+    }
+
+    @Override
+    public Iterator<Pole<?>> iterator() {
+        return new MyIterator();
+    }
+
+    private class MyIterator implements Iterator<Pole<?>>{
+        private int index = 0;
+        @Override
+        public boolean hasNext() {
+            return index<Row.this.listaPol.size();
+        }
+
+        @Override
+        public Pole<?> next() {
+            if(hasNext()){
+                return Row.this.listaPol.get(index++);
+            }else{
+                throw new IndexOutOfBoundsException();
+            }
+        }
     }
 }
 

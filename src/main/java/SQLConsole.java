@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -15,7 +16,7 @@ public class SQLConsole extends JDialog {
 
     private void dodajComponenty() {
         JPanel panelGlowny = new JPanel();
-        panelGlowny.setLayout(new BorderLayout()); // Ustawiamy BorderLayout jako główny układ
+        panelGlowny.setLayout(new BorderLayout());
 
         // Panel tekstowy z JTextArea
         JTextArea textArea = new JTextArea(new String("Insert SQL command"));
@@ -32,12 +33,11 @@ public class SQLConsole extends JDialog {
         });
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
-        JScrollPane scrollPane = new JScrollPane(textArea); // Dodajemy JScrollPane dla JTextArea
-        panelGlowny.add(scrollPane, BorderLayout.CENTER); // Umieszczamy JScrollPane na środku
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        panelGlowny.add(scrollPane, BorderLayout.CENTER);
 
-        // Panel z przyciskami
         JPanel panelPrzyciskow = new JPanel();
-        panelPrzyciskow.setLayout(new FlowLayout(FlowLayout.RIGHT)); // Ustawiamy przyciski po prawej stronie
+        panelPrzyciskow.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
         JButton runButton = new JButton("Run");
         runButton.setPreferredSize(new Dimension(60, 20));
@@ -45,8 +45,17 @@ public class SQLConsole extends JDialog {
         runButton.addActionListener(e -> {
             runCommand(textArea.getText());
             BazaDanych.getBazaDanych().getSqlThreadQueue().rozpocznijWykonywanie();
-            //Musze jakos wylapywac jesli wpisane polecenie SQL jest niepoprawne
-            this.dispose();
+        });
+        InputMap inputMap = runButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = runButton.getActionMap();
+        KeyStroke keyStroke = KeyStroke.getKeyStroke("control R");
+        inputMap.put(keyStroke, "runButton");
+
+        actionMap.put("runButton", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                runButton.doClick();
+            }
         });
 
         JButton cancelButton = new JButton("Cancel");
@@ -57,13 +66,17 @@ public class SQLConsole extends JDialog {
         panelPrzyciskow.add(runButton);
         panelPrzyciskow.add(cancelButton);
 
-        panelGlowny.add(panelPrzyciskow, BorderLayout.SOUTH); // Umieszczamy panel z przyciskami na dole
+        panelGlowny.add(panelPrzyciskow, BorderLayout.SOUTH);
 
         this.add(panelGlowny);
     }
 
     private void runCommand(String textCommand) {
-        BazaDanych.getBazaDanych().customSQLCommand(textCommand);
+        BazaDanych.getBazaDanych().customSQLCommand(this, textCommand);
+    }
+
+    public static void poinformujOBledzie(){
+        JOptionPane.showMessageDialog(OknoGlowne.getOknoGlowne(), "A SQL error occured.\nPlease check the syntax and correctness of the command", "SQL error", JOptionPane.ERROR_MESSAGE);
     }
 
 }

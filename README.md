@@ -1,7 +1,7 @@
 # Mini projekt Edytor Baz Danych Java:
 ### Czego ma mnie nauczyć ten projekt?
 - Obsługa baz danych w Javie
-- Poszerzenie wiedzy o elementach Biblioteki Swing
+- Poszerzenie wiedzy o elementach biblioteki Swing
 - Refaktoryzacja kodu
 ### Co ma zawierać projekt?
 Zrobić aplikację okienkową, która pozwoli na:
@@ -9,14 +9,18 @@ Zrobić aplikację okienkową, która pozwoli na:
 - [x] Usunięcie z bazy gracza o danej nazwie, jeśli istnieje
 - [x] Wyświetlenie w okienku wszystkich graczy w bazie
 - [x] Możliwość kliknięcia gracza z wyświetlonej listy i usunięcie go po wciśnięciu odpowiedniego przycisku
-- [ ] Możliwość edycji tabeli poprzez JTable\
+- [x] Możliwość edycji tabeli poprzez JTable
 - [x] Dostosowanie aplikacji do dowolnej wczytanej bazy danych
 - [x] Możliwość wczytania dowolnej bazy danych
+- [x] Możliwość wpisania dowolnego polecenia SQL
+- [ ] Dodanie loggera błędów
 - [ ] Dostosowanie aplikacji do baz innych niż MySql
 - [ ] Zastanowienie się nad własnymi wyjątkami i czy są potrzebne
 - [ ] Refaktoryzacja kodu
 
 ### Pomysły co dodać do projektu:
-- [ ] Przenisienie systemu usuwania wierszy calkowicie do zakladki edytuj tabele
-- [ ] Dodanie checkboxa w zakladce edytuj tabele pozwalający na przełączanie między
-      dodawanymi nowymi rekordami, a wszystkimi rekordami w bazie.
+- [ ] Zaznaczanie, które kolumny tabeli mają nam być pokazywane
+
+### Co koniecznie trzeba zmienić:
+- Konsola SQL nie pokazuje kwerend, które zostają wpisane. Działa jedynie z poleceniami, jak np. INSERT i DELETE.
+- Dodanie usuwania tekstu domyślnego ("Insert SQL query") z konsoli SQL po wpisaniu znaku. Na razie znika on jedynie po kliknięciu myszką.
