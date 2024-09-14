@@ -28,24 +28,16 @@ public class Menu extends JMenuBar {
 
     public void dodajOpcjeBazyDanych() {
         JMenu wybierzTabeleMenu = new JMenu("Select table");
-        try {
-            List<String> listaTabel = BazaDanych.getBazaDanych().getNazwyTabel();
-            for(String nazwaTabeli: listaTabel){
-                JMenuItem nazwaTabeliMI = new JMenuItem(nazwaTabeli);
-                nazwaTabeliMI.addActionListener(e -> {
-                    try {
-                        BazaDanych.getBazaDanych().setNazwaTabeli(nazwaTabeli);
-                        BazaDanych.getBazaDanych().zaktualizujBaze();
-                        PanelElementow.zaladujTabele();
-                        zaktualizujMenu();
-                    } catch (SQLException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                });
-                wybierzTabeleMenu.add(nazwaTabeliMI);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        List<String> listaTabel = InformacjeOBazie.getTableNames();
+        for(String nazwaTabeli: listaTabel){
+            JMenuItem nazwaTabeliMI = new JMenuItem(nazwaTabeli);
+            nazwaTabeliMI.addActionListener(e -> {
+                BazaDanych.getBazaDanych().changeTable(nazwaTabeli);
+                BazaDanych.getBazaDanych().zaktualizujBaze();
+                PanelElementow.zaladujTabele();
+                zaktualizujMenu();
+            });
+            wybierzTabeleMenu.add(nazwaTabeliMI);
         }
         menuGlowne.add(wybierzTabeleMenu);
         JMenuItem edytujTabeleMI = new JMenuItem("Edit table");
@@ -60,9 +52,7 @@ public class Menu extends JMenuBar {
         JMenu sortujDESC = new JMenu("DESC");
         sortujWyniki.add(sortujASC);
         sortujWyniki.add(sortujDESC);
-        InformacjeOTabeli informacjeOTabeli = BazaDanych.getBazaDanych().getInformacjeOTabeli();
-        System.out.println(informacjeOTabeli);
-        List<String> listaKolumn = informacjeOTabeli.getInformacjaOKolumnie(InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY);
+        List<String> listaKolumn = InformacjeOBazie.getActiveTableInfo().getInformacjaOKolumnie(InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY);
         for(String nazwaKolumny: listaKolumn){
             JMenuItem przyciskKolumnyASC = new JMenuItem(nazwaKolumny);
             przyciskKolumnyASC.addActionListener(e -> {
@@ -100,12 +90,8 @@ public class Menu extends JMenuBar {
 
     private void edytujTabele() {
         OknoEdycjiTabeli oknoEdytowaniaTabeli = new OknoEdycjiTabeli(OknoGlowne.getOknoGlowne(), "Edytuj tabelę", true);
-        try {
-            BazaDanych.getBazaDanych().zaktualizujBaze();
-            PanelElementow.zaladujTabele();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        BazaDanych.getBazaDanych().zaktualizujBaze();
+        PanelElementow.zaladujTabele();
 
     }
 

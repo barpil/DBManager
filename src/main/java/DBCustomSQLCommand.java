@@ -2,11 +2,12 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class DBCustomSQLCommand extends DBConnector implements SQLRunnable {
+public class DBCustomSQLCommand implements SQLRunnable {
+    Connection connection;
     private final String textCommand;
     private SQLConsole sqlConsole;
     DBCustomSQLCommand(Connection connection, String textCommand, SQLConsole sqlConsole) {
-        super(connection);
+        this.connection=connection;
         this.textCommand=textCommand;
         this.sqlConsole=sqlConsole;
     }

@@ -5,22 +5,20 @@ import java.util.List;
 import java.util.Queue;
 
 public class SQLThreadQueue {
-    final int LICZBA_OBSLUGIWANYCH_WATKOW = 2; //Mozna dodac do config file'a liczbe obslugiwanych watkow
-    private List<Exception> listaBledowPodczasWykonywania;
-    private int liczbaZajetychWatkow = 0;
-    private final Queue<Thread> threadQueue = new LinkedList<>();
-    private final Object lock = new Object();
-    private ThreadProgressBar progressBar;
+    static final int LICZBA_OBSLUGIWANYCH_WATKOW = 2; //Mozna dodac do config file'a liczbe obslugiwanych watkow
+    private static List<Exception> listaBledowPodczasWykonywania;
+    private static int liczbaZajetychWatkow = 0;
+    private static final Queue<Thread> threadQueue = new LinkedList<>();
+    private static final Object lock = new Object();
 
-    public void dodajWatek(SQLRunnable runnable){
+    public static void dodajWatek(SQLRunnable runnable){
         threadQueue.add(new Thread(runnable));
         System.out.println("Dodano wątek.");
     }
 
-    public synchronized void rozpocznijWykonywanie() {
+    public static synchronized void rozpocznijWykonywanie() {
         listaBledowPodczasWykonywania= new LinkedList<>();
-        progressBar = PanelSterowania.getPanelSterowania().getProgressBar();
-        progressBar.przygotujProgressBar();
+        PanelSterowania.getPanelSterowania().getProgressBar().przygotujProgressBar();
 
         Thread thread = new Thread(() -> {
             if (!threadQueue.isEmpty()) {
@@ -49,49 +47,44 @@ public class SQLThreadQueue {
 
             }
 
-                try {
-                    progressBar.setValue(progressBar.getMaximum());
-                    System.out.println("Zakonczono wątki. Liczba pozostalych watkow: "+liczbaPozostalychWatkow());
+            PanelSterowania.getPanelSterowania().getProgressBar().setValue(PanelSterowania.getPanelSterowania().getProgressBar().getMaximum());
+            System.out.println("Zakonczono wątki. Liczba pozostalych watkow: "+liczbaPozostalychWatkow());
 
-                    BazaDanych.getBazaDanych().zaktualizujBaze();
-                    PanelElementow.zaladujTabele();
-
-
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
+            BazaDanych.getBazaDanych().zaktualizujBaze();
+            PanelElementow.zaladujTabele();
 
 
-            });
+        });
 
 
         thread.start();
 
     }
 
-    public void zakonczonoWatek() {
+
+    public static void zakonczonoWatek() {
         synchronized (lock) {
             liczbaZajetychWatkow--;
             SwingUtilities.invokeLater(() -> {
-                progressBar.zwiekszProgress();
-                progressBar.repaint();
+                PanelSterowania.getPanelSterowania().getProgressBar().zwiekszProgress();
+                PanelSterowania.getPanelSterowania().getProgressBar().repaint();
             });
             lock.notifyAll();
         }
     }
 
-    public int liczbaPozostalychWatkow() {
+    public static int liczbaPozostalychWatkow() {
         return threadQueue.size();
     }
 
-    public void resetQueue(){
+    public static void resetQueue(){
         threadQueue.clear();
         System.out.println("Kolejka watkow wyczyszczona");
     }
-    public void logError(Exception e){
+    public static void logError(Exception e){
         listaBledowPodczasWykonywania.add(e);
     }
-    public List<Exception> getErrors(){
+    public static List<Exception> getErrors(){
         return listaBledowPodczasWykonywania;
     }
 }

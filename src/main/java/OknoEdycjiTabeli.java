@@ -13,11 +13,7 @@ public class OknoEdycjiTabeli extends JDialog {
         super(frame, nazwaOkna, modal);
         this.setSize(new Dimension(400, 400));
         this.setResizable(true);
-        try {
-            BazaDanych.getBazaDanych().zaktualizujBaze();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        BazaDanych.getBazaDanych().zaktualizujBaze();
         dodajComponenty();
         this.setVisible(true);
     }
@@ -27,7 +23,7 @@ public class OknoEdycjiTabeli extends JDialog {
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                if (!tabelaPodgladu.dodawaneDane.isEmpty() || BazaDanych.getBazaDanych().getSqlThreadQueue().liczbaPozostalychWatkow()!=0) {
+                if (!tabelaPodgladu.dodawaneDane.isEmpty() || SQLThreadQueue.liczbaPozostalychWatkow()!=0) {
                     int potwierdzenieZamkniecia = JOptionPane.showConfirmDialog(
                             OknoEdycjiTabeli.this,
                             "Do you want to discard the changes?",
@@ -37,7 +33,7 @@ public class OknoEdycjiTabeli extends JDialog {
                     );
 
                     if (potwierdzenieZamkniecia == JOptionPane.YES_OPTION) {
-                        BazaDanych.getBazaDanych().getSqlThreadQueue().resetQueue();
+                        SQLThreadQueue.resetQueue();
                         OknoEdycjiTabeli.this.dispose();
                     }
                 }else{
@@ -113,18 +109,18 @@ public class OknoEdycjiTabeli extends JDialog {
             }
 
             private void dodajWiersz() {
-                Row dodawanyWiersz = new Row(InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn());
+                Row dodawanyWiersz = new Row(InformacjeOBazie.getActiveTableInfo().getLiczbaKolumn());
                 if (this.isEditing()) {
                     this.getCellEditor().stopCellEditing();
                 }
 
-                for (int i = 0; i < InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn(); i++) {
-                    dodawanyWiersz.addPole(InformacjeOTabeli.getInformacjeOTabeli().getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY), this.getModel().getValueAt(0, i));
+                for (int i = 0; i < InformacjeOBazie.getActiveTableInfo().getLiczbaKolumn(); i++) {
+                    dodawanyWiersz.addPole(InformacjeOBazie.getActiveTableInfo().getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY), this.getModel().getValueAt(0, i));
                 }
 
                 List<Integer> listaNiewypelnionych = new LinkedList<>();
                 for(int i=0;i<dodawanyWiersz.listaPol.size();i++){
-                    if(InformacjeOTabeli.getInformacjeOTabeli().getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.IS_NULLABLE).equals("NO") && dodawanyWiersz.getPole(i).getWartosc()==null){
+                    if(InformacjeOBazie.getActiveTableInfo().getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.IS_NULLABLE).equals("NO") && dodawanyWiersz.getPole(i).getWartosc()==null){
                         listaNiewypelnionych.add(i);
                     }
                 }
@@ -217,21 +213,21 @@ public class OknoEdycjiTabeli extends JDialog {
         applyButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
         applyButton.addActionListener(e -> {
             BazaDanych.getBazaDanych().dodajDane(tabelaPodgladu.getData());
-            BazaDanych.getBazaDanych().getSqlThreadQueue().rozpocznijWykonywanie();
-            while(BazaDanych.getBazaDanych().getSqlThreadQueue().liczbaPozostalychWatkow()!=0){
+            SQLThreadQueue.rozpocznijWykonywanie();
+            while(SQLThreadQueue.liczbaPozostalychWatkow()!=0){
                 try {
                     Thread.sleep(50);
                 } catch (InterruptedException ex) {
                     throw new RuntimeException(ex);
                 }
             }
-            if(BazaDanych.getBazaDanych().getSqlThreadQueue().getErrors().isEmpty()){
+            if(SQLThreadQueue.getErrors().isEmpty()){
                 this.dispose();
             } else{
                 PanelSterowania.getPanelSterowania().getProgressBar().setVisible(false);
                 String wiadomoscKomunikatu;
                 JLabel komunikat;
-                SQLException sqlException = (SQLException) BazaDanych.getBazaDanych().getSqlThreadQueue().getErrors().getFirst();
+                SQLException sqlException = (SQLException) SQLThreadQueue.getErrors().getFirst();
                 switch (sqlException.getErrorCode()){
                     case 1062:
                         wiadomoscKomunikatu = "Primary key duplicate error.\nPlease remove duplicate data.<br> Error message:<br><font color='red'>"+sqlException.getMessage()+"</font>";
@@ -253,7 +249,7 @@ public class OknoEdycjiTabeli extends JDialog {
         cancelButton.setPreferredSize(new Dimension(60,20));
         cancelButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
         cancelButton.addActionListener(e -> {
-            BazaDanych.getBazaDanych().getSqlThreadQueue().resetQueue();
+            SQLThreadQueue.resetQueue();
             this.dispose();
         });
         panelPrzyciskowOkna.add(applyButton);
@@ -300,22 +296,22 @@ class TabelaEdycji extends TabelaSQL {
         }
         Object[][] dane;
         if(onlyNewOption){
-            dane = new Object[dodawaneDane.size()][InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn()];
+            dane = new Object[dodawaneDane.size()][InformacjeOBazie.getActiveTableInfo().getLiczbaKolumn()];
             for(int j=0;j< dodawaneDane.size();j++){
-                for(int k=0;k<InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn();k++){
+                for(int k=0;k<InformacjeOBazie.getActiveTableInfo().getLiczbaKolumn();k++){
                     dane[j][k]=dodawaneDane.get(j).getPole(k).getWartosc();
                 }
             }
         }
         else{
-            dane = new Object[dodawaneDane.size()+daneBazy.size()][InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn()];
+            dane = new Object[dodawaneDane.size()+daneBazy.size()][InformacjeOBazie.getActiveTableInfo().getLiczbaKolumn()];
             for(int j=0;j<daneBazy.size();j++){
-                for(int k=0;k<InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn();k++){
+                for(int k=0;k<InformacjeOBazie.getActiveTableInfo().getLiczbaKolumn();k++){
                     dane[j][k]=daneBazy.get(j).getPole(k).getWartosc();
                 }
             }
             for(int j=0;j< dodawaneDane.size();j++){
-                for(int k=0;k<InformacjeOTabeli.informacjeOTabeli.getLiczbaKolumn();k++){
+                for(int k=0;k<InformacjeOBazie.getActiveTableInfo().getLiczbaKolumn();k++){
                     dane[j+daneBazy.size()][k]=dodawaneDane.get(j).getPole(k).getWartosc();
                 }
             }

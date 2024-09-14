@@ -3,15 +3,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class DBUpdate extends DBConnector implements Runnable{
+public class DBUpdate implements Runnable{
+    Connection connection;
     String query;
     DBUpdate(Connection connection) {
-        super(connection);
-        query="SELECT * FROM " + BazaDanych.getBazaDanych().getNazwaTabeli() + ";";
+        this.connection=connection;
+        query="SELECT * FROM " + InformacjeOBazie.getActiveTableName() + ";";
     }
 
     DBUpdate(Connection connection, String selectQuery){
-        super(connection);
+        this.connection=connection;
         query=selectQuery;
     }
 
@@ -22,16 +23,14 @@ public class DBUpdate extends DBConnector implements Runnable{
         try {
             statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
-            BazaDanych.getBazaDanych().setInformacjeOTabeli(new InformacjeOTabeli(connection, BazaDanych.getBazaDanych().getInformacjeOBazie(), BazaDanych.getBazaDanych().getNazwaTabeli() ));
-            InformacjeOTabeli informacjeOTabeli = BazaDanych.getBazaDanych().getInformacjeOTabeli();
             {
                 Row dodawanyRzad;
-                int liczbaKolumn = informacjeOTabeli.getLiczbaKolumn();
+                int liczbaKolumn = InformacjeOBazie.getActiveTableInfo().getLiczbaKolumn();
                 while (resultSet.next()) {
                     dodawanyRzad = new Row(liczbaKolumn);
                     for (int i = 0; i < liczbaKolumn; i++) {
-                        String nazwaKolumny = informacjeOTabeli.getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY);
-                        switch (informacjeOTabeli.getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.TYP_DANYCH_KOLUMNY)) {
+                        String nazwaKolumny = InformacjeOBazie.getActiveTableInfo().getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY);
+                        switch (InformacjeOBazie.getActiveTableInfo().getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.TYP_DANYCH_KOLUMNY)) {
                             case "int":
                                 dodawanyRzad.addPole(nazwaKolumny, resultSet.getInt(nazwaKolumny));
                                 break;

@@ -1,6 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
-import java.lang.reflect.InvocationTargetException;
+
 
 public class ThreadProgressBar extends JProgressBar {
     final private int MIN_VALUE = 0;
@@ -24,10 +24,10 @@ public class ThreadProgressBar extends JProgressBar {
     }
 
     public void przygotujProgressBar() {
-        if (BazaDanych.getBazaDanych().getSqlThreadQueue().liczbaPozostalychWatkow()!=0) {
+        if (SQLThreadQueue.liczbaPozostalychWatkow()!=0) {
             this.setVisible(true);
             this.setValue(MIN_VALUE);
-            progressUnit = MAX_VALUE / BazaDanych.getBazaDanych().getSqlThreadQueue().liczbaPozostalychWatkow();
+            progressUnit = MAX_VALUE / SQLThreadQueue.liczbaPozostalychWatkow();
             this.repaint();
         }
     }

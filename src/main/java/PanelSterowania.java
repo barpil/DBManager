@@ -9,11 +9,10 @@ public class PanelSterowania extends JPanel {
     private static PanelSterowania panelSterowania;
     private JPanel panelProgressBara;
     private ThreadProgressBar progressBar;
-    private Button przyciskRozpoczecia;
 
     private PanelSterowania() {
         this.setPreferredSize(new Dimension(500, 20));
-        this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS)); // Użycie BoxLayout.Y_AXIS dla układu pionowego
+        this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         dodajElementy();
 
 
@@ -46,9 +45,4 @@ public class PanelSterowania extends JPanel {
         return panelSterowania;
     }
 
-
-
-    public JPanel getPanelProgressBara() {
-        return panelProgressBara;
-    }
 }

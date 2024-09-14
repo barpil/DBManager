@@ -13,7 +13,6 @@ public class PanelElementow extends JScrollPane{
     };
     private PanelElementow() {
         this.setPreferredSize(new Dimension(500, 500));
-        utworzElementy();
         if(BazaDanych.getBazaDanych()!=null){
             zaladujTabele();
             panelElementow.setViewportView(tabelaPodgladuBazyDanych);
@@ -24,9 +23,6 @@ public class PanelElementow extends JScrollPane{
 
     }
 
-    private void utworzElementy() {
-
-    }
 
     public static void zaladujTabele(){
         tabelaPodgladuBazyDanych = new TabelaPodgladuBazyDanych();

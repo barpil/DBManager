@@ -32,23 +32,21 @@ public class SQLConsole extends JDialog {
 
         JScrollPane scrollPaneTabeli = new JScrollPane();
 
-        // Konfiguracja tabeli
         tabelaWyswietlaniaWynikow = new TabelaWyswietlaniaWynikow(false);
         tabelaWyswietlaniaWynikow.setVisible(false);
         tabelaWyswietlaniaWynikow.setPreferredScrollableViewportSize(new Dimension(400, 400));
-        tabelaWyswietlaniaWynikow.setFillsViewportHeight(true);  // Wypełnia przestrzeń
-        tabelaWyswietlaniaWynikow.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);  // Dopasowuje kolumny
+        tabelaWyswietlaniaWynikow.setFillsViewportHeight(true);
+        tabelaWyswietlaniaWynikow.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
         scrollPaneTabeli.setViewportView(tabelaWyswietlaniaWynikow);
-        scrollPaneTabeli.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);  // Przewijanie pionowe
-        scrollPaneTabeli.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);  // Przewijanie poziome
+        scrollPaneTabeli.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPaneTabeli.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
         panelWyswietlaniaWynikow.add(scrollPaneTabeli);
 
         JLabel showQueryResultLabel = new JLabel("Show result");
         JCheckBox showQueryResultCB = new JCheckBox();
 
-        // Obsługa checkboxa
         ItemListener myItemListener = e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 panelWyswietlaniaWynikow.setPreferredSize(new Dimension(400, 400));
@@ -56,13 +54,13 @@ public class SQLConsole extends JDialog {
                 tabelaWyswietlaniaWynikow.updateModel();
                 tabelaWyswietlaniaWynikow.revalidate();
                 tabelaWyswietlaniaWynikow.repaint();
-                this.pack();  // Dostosowanie rozmiaru okna
+                this.pack();
             } else {
                 panelWyswietlaniaWynikow.setPreferredSize(new Dimension(0, 0));
                 tabelaWyswietlaniaWynikow.setVisible(false);
                 this.revalidate();
                 tabelaWyswietlaniaWynikow.repaint();
-                this.pack();  // Dostosowanie okna po ukryciu tabeli
+                this.pack();
             }
         };
         showQueryResultCB.addItemListener(myItemListener);
@@ -75,7 +73,6 @@ public class SQLConsole extends JDialog {
         panelPolecen.setLayout(new BorderLayout());
         panelPolecen.setPreferredSize(new Dimension(400, 350));
 
-        // Panel tekstowy z JTextArea
         JTextArea textArea = new JTextArea("Insert SQL command");
         textArea.addMouseListener(new MouseAdapter() {
             boolean czyJuzKlikniete = false;
@@ -88,6 +85,7 @@ public class SQLConsole extends JDialog {
                 }
             }
         });
+
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
         JScrollPane scrollPane = new JScrollPane(textArea);
@@ -101,15 +99,15 @@ public class SQLConsole extends JDialog {
         runButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
         runButton.addActionListener(e -> {
             runCommand(textArea.getText());
-            BazaDanych.getBazaDanych().getSqlThreadQueue().rozpocznijWykonywanie();
+            SQLThreadQueue.rozpocznijWykonywanie();
         });
 
-        InputMap inputMap = runButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        ActionMap actionMap = runButton.getActionMap();
-        KeyStroke keyStroke = KeyStroke.getKeyStroke("control R");
-        inputMap.put(keyStroke, "runButton");
+        InputMap inputMap = textArea.getInputMap(JComponent.WHEN_FOCUSED);
+        ActionMap actionMap = textArea.getActionMap();
+        KeyStroke keyStroke = KeyStroke.getKeyStroke("control ENTER");
+        inputMap.put(keyStroke, "runCommandKey");
 
-        actionMap.put("runButton", new AbstractAction() {
+        actionMap.put("runCommandKey", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 runButton.doClick();
@@ -160,7 +158,6 @@ public class SQLConsole extends JDialog {
 }
 
 class TabelaWyswietlaniaWynikow extends TabelaSQL{
-    DefaultTableModel model;
     ResultSet resultSet=null;
     TabelaWyswietlaniaWynikow(boolean isCellEditable) {
         super(isCellEditable);
@@ -176,7 +173,7 @@ class TabelaWyswietlaniaWynikow extends TabelaSQL{
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
-            String nazwyKolumn[] = new String[liczbaKolumn];
+            String[] nazwyKolumn = new String[liczbaKolumn];
 
             try {
                 for(int i=0; i<resultSet.getMetaData().getColumnCount();i++){
@@ -197,7 +194,7 @@ class TabelaWyswietlaniaWynikow extends TabelaSQL{
     }
 
     private Object[][] przygotujDaneTabeli() {
-        Object[][] wynik=new Object[0][0];
+        Object[][] wynik;
         try {
             List<Row> listaDanych = new LinkedList<>();
             Row dodawanyRzad;
@@ -206,7 +203,7 @@ class TabelaWyswietlaniaWynikow extends TabelaSQL{
             while (resultSet.next()) {
                 dodawanyRzad = new Row(liczbaKolumn);
 
-//Musze naprawic scrollPane bo nie pokazuje calej tabeli
+
                 for (int i = 0; i < liczbaKolumn; i++) {
                     String nazwaKolumny = resultSet.getMetaData().getColumnName(i+1);
                     switch (resultSet.getMetaData().getColumnTypeName(i+1).toLowerCase()) {
@@ -232,9 +229,7 @@ class TabelaWyswietlaniaWynikow extends TabelaSQL{
             for(int j=0;j< listaDanych.size();j++){
                 for(int k=0;k<liczbaKolumn;k++){
                     wynik[j][k] = listaDanych.get(j).getPole(k).getWartosc();
-                    System.out.print(listaDanych.get(j).getPole(k).getWartosc()+" ");
                 }
-                System.out.println();
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);

@@ -3,10 +3,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
-public class DBDeleteData extends DBConnector implements SQLRunnable{
+public class DBDeleteData implements SQLRunnable{
+    Connection connection;
     int[] numeryWierszy;
     DBDeleteData(Connection connection, int[] numeryWierszy) {
-        super(connection);
+        this.connection=connection;
         this.numeryWierszy = numeryWierszy;
     }
 
@@ -17,8 +18,8 @@ public class DBDeleteData extends DBConnector implements SQLRunnable{
         try {
             statement = connection.createStatement();
             List<Row> dane = BazaDanych.getBazaDanych().getDane();
-            String kluczGlowny = BazaDanych.getBazaDanych().getInformacjeOTabeli().getKluczGlowny();
-            String deleteQuery = "DELETE FROM "+BazaDanych.getBazaDanych().getNazwaTabeli()+" WHERE "+kluczGlowny+" IN (";
+            String kluczGlowny = InformacjeOBazie.getActiveTableInfo().getKluczGlowny();
+            String deleteQuery = "DELETE FROM "+InformacjeOBazie.getActiveTableName()+" WHERE "+kluczGlowny+" IN (";
             deleteQuery+=dane.get(numeryWierszy[0]).getPole(kluczGlowny).getWartosc();
             for(int i=1; i< numeryWierszy.length;i++){
                 deleteQuery+=", "+dane.get(numeryWierszy[i]).getPole(kluczGlowny).getWartosc();
@@ -37,7 +38,6 @@ public class DBDeleteData extends DBConnector implements SQLRunnable{
             }
         }
 
-         //BEDZIE TRZEBA POUSUWAC TO LADOWANIE I AKTUALIZACJE SKORO ROBIE KOLEJKE THREAD
         poinformujOZakonczeniuWatku();
     }
 

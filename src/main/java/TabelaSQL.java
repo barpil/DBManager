@@ -1,9 +1,7 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.sql.SQLException;
+
 
 abstract public class TabelaSQL extends JTable {
     String[] nazwyKolumnTabeli=null;
@@ -31,10 +29,10 @@ abstract public class TabelaSQL extends JTable {
 
 
     protected void updateColumnNames(){
-        int liczbaKolumn = BazaDanych.getBazaDanych().getInformacjeOTabeli().getLiczbaKolumn();
+        int liczbaKolumn = InformacjeOBazie.getActiveTableInfo().getLiczbaKolumn();
         String nazwyKolumn[] = new String[liczbaKolumn];
         int i=0;
-        for(String nazwaKolumny: BazaDanych.getBazaDanych().getInformacjeOTabeli().getInformacjaOKolumnie(InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY)){
+        for(String nazwaKolumny: InformacjeOBazie.getActiveTableInfo().getInformacjaOKolumnie(InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY)){
             nazwyKolumn[i]=nazwaKolumny;
             i++;
         }

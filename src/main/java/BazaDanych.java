@@ -1,8 +1,5 @@
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class BazaDanych {
     private static BazaDanych bazaDanych;
@@ -16,55 +13,19 @@ public class BazaDanych {
 
         tabele: users, lista
      */
-    record InformacjeOBazie(String nazwaBazy, String nazwaWybranejTabeli, List<String> nazwyTabel){};
 
-    private String nazwaBazy;
-    private final String nazwaSerwera;
-    private final String port;
-    private String nazwaTabeli;
-    private String nazwaUzytkownika;
-    private String hasloUzytkownika;
-    private List<String> nazwyTabel;
-    private List<Row> dane = new LinkedList<>();
-    private final java.sql.Connection connection;
-    private SQLThreadQueue sqlThreadQueue = new SQLThreadQueue();
-
-    public InformacjeOBazie getInformacjeOBazie() {
-        return informacjeOBazie;
-    }
-
-    private InformacjeOBazie informacjeOBazie;
-    private InformacjeOTabeli informacjeOTabeli;
+    private final List<Row> dane = new LinkedList<>();
 
     private BazaDanych(String nazwaSerwera, String port, String nazwaBazy, String nazwaUzytkownika, String hasloUzytkownika) throws SQLException {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            //Klasa Connection odpowiada za polaczenie z baza danych
-            connection = DriverManager.getConnection("jdbc:mysql://"+nazwaSerwera+":"+port+"/" + nazwaBazy, nazwaUzytkownika, hasloUzytkownika);
-            this.nazwaSerwera = nazwaSerwera;
-            this.port = port;
-            this.nazwaBazy = nazwaBazy;
-            this.nazwaUzytkownika = nazwaUzytkownika;
-            this.hasloUzytkownika = hasloUzytkownika;
-            informacjeOBazie=new InformacjeOBazie(nazwaBazy, getNazwyTabel().getFirst(), getNazwyTabel());
-            setNazwaTabeli(informacjeOBazie.nazwyTabel.getFirst());
-            this.informacjeOTabeli= new InformacjeOTabeli(connection, informacjeOBazie, nazwaTabeli);
-
-
-        }catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        InformacjeOBazie.createDataBaseInfo(nazwaSerwera, port, nazwaBazy, nazwaUzytkownika, hasloUzytkownika);
     }
 
     public static BazaDanych getBazaDanych() {
-//        if (bazaDanych == null) {
-//            bazaDanych = new BazaDanych();
-//        }
         return bazaDanych;
     }
 
-    synchronized public void zaktualizujBaze() throws SQLException {
-        Thread thread = new Thread(new DBUpdate(connection));
+    synchronized public void zaktualizujBaze() {
+        Thread thread = new Thread(new DBUpdate(InformacjeOBazie.getConnection()));
         thread.start();
         try {
             thread.join();
@@ -76,35 +37,35 @@ public class BazaDanych {
     }
 
     public void dodajDane(List<Row> dane) {
-        utworzWatek(new DBAddData(connection, dane));
+        utworzWatek(new DBAddData(InformacjeOBazie.getConnection(), dane));
     }
 
 
 
     public void usunDane(int[] numeryWierszy) {
-        utworzWatek(new DBDeleteData(connection, numeryWierszy));
+        utworzWatek(new DBDeleteData(InformacjeOBazie.getConnection(), numeryWierszy));
 
     }
 
     public void customSQLCommand(SQLConsole okno, String textCommand){
-        utworzWatek(new DBCustomSQLCommand(connection, textCommand, okno));
+        utworzWatek(new DBCustomSQLCommand(InformacjeOBazie.getConnection(), textCommand, okno));
     }
 
     public void sortujDane(String by, String order) throws SQLException {
         Statement statement = null;
         dane.clear();
         try {
-            statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM "+ nazwaTabeli+" ORDER BY " + by + " " + order + ";");
+            statement = InformacjeOBazie.getConnection().createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM "+ InformacjeOBazie.getActiveTableName()+" ORDER BY " + by + " " + order + ";");
 
             {
                 Row dodawanyRzad;
-                int liczbaKolumn = informacjeOTabeli.getLiczbaKolumn();
+                int liczbaKolumn = InformacjeOBazie.getActiveTableInfo().getLiczbaKolumn();
                 while (resultSet.next()) {
                     dodawanyRzad = new Row(liczbaKolumn);
                     for (int i = 0; i < liczbaKolumn; i++) {
-                        String nazwaKolumny = informacjeOTabeli.getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY);
-                        switch (informacjeOTabeli.getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.TYP_DANYCH_KOLUMNY)) {
+                        String nazwaKolumny = InformacjeOBazie.getActiveTableInfo().getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY);
+                        switch (InformacjeOBazie.getActiveTableInfo().getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.TYP_DANYCH_KOLUMNY)) {
                             case "int":
                                 dodawanyRzad.addPole(nazwaKolumny, resultSet.getInt(nazwaKolumny));
                                 break;
@@ -128,13 +89,13 @@ public class BazaDanych {
     }
 
 
-    public static void ustawBaze(String nazwaSerwera, String port, String nazwaBazy, String nazwaUzytkownika, String hasloUzytkownika) throws SQLException {
+    public static void changeDatabase(String nazwaSerwera, String port, String nazwaBazy, String nazwaUzytkownika, String hasloUzytkownika) throws SQLException {
         bazaDanych = new BazaDanych(nazwaSerwera, port, nazwaBazy, nazwaUzytkownika, hasloUzytkownika);
 
     }
 
     private void utworzWatek(SQLRunnable runnable){
-        getSqlThreadQueue().dodajWatek(runnable);
+        SQLThreadQueue.dodajWatek(runnable);
     }
 
     public List<Row> getDane() {
@@ -142,7 +103,7 @@ public class BazaDanych {
     }
 
     public Object[][] getData() {
-        int liczbaKolumn = getInformacjeOTabeli().getLiczbaKolumn();
+        int liczbaKolumn = InformacjeOBazie.getActiveTableInfo().getLiczbaKolumn();
         Object[][] obj = new Object[getDane().size()][liczbaKolumn];
         for (int i = 0; i < getDane().size(); i++) {
             for(int j=0;j<liczbaKolumn;j++){
@@ -153,35 +114,7 @@ public class BazaDanych {
         return obj;
     }
 
-    public List<String> getNazwyTabel() throws SQLException {
-        if (nazwyTabel==null) {
-            nazwyTabel = new ArrayList<>(0);
-            Statement statement = connection.createStatement();
-            String getTablesQueries = "SHOW TABLES;";
-
-            ResultSet resultSet = statement.executeQuery(getTablesQueries);
-            while(resultSet.next()){
-                String nazwa = resultSet.getString(1);
-                nazwyTabel.add(nazwa);
-
-            }
-        }
-        return nazwyTabel;
-    }
-
-    public InformacjeOTabeli getInformacjeOTabeli() {return informacjeOTabeli;}
-
-    public void setInformacjeOTabeli(InformacjeOTabeli informacjeOTabeli) {this.informacjeOTabeli = informacjeOTabeli;}
-
-    public String getNazwaBazy() {return nazwaBazy;}
-    public String getNazwaTabeli() {return nazwaTabeli;}
-
-    public SQLThreadQueue getSqlThreadQueue() {return sqlThreadQueue;}
-
-    public void setNazwaBazy(String nazwaBazy) {this.nazwaBazy = nazwaBazy;}
-    public void setNazwaTabeli(String nazwaTabeli) {this.nazwaTabeli = nazwaTabeli;}
-    public void setNazwaUzytkownika(String nazwaUzytkownika) {this.nazwaUzytkownika = nazwaUzytkownika;}
-    public void setHasloUzytkownika(String hasloUzytkownika) {this.hasloUzytkownika = hasloUzytkownika;}
+    public void changeTable(String nazwaTabeli) {InformacjeOBazie.changeActiveTableInfo(nazwaTabeli);}
 
 
 }
@@ -246,7 +179,7 @@ class Row implements Iterable<Pole<?>>{
             if(hasNext()){
                 return Row.this.listaPol.get(index++);
             }else{
-                throw new IndexOutOfBoundsException();
+                throw new NoSuchElementException();
             }
         }
     }

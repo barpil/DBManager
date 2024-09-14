@@ -1,8 +1,4 @@
-import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.sql.SQLException;
 
 public class TabelaPodgladuBazyDanych extends TabelaSQL {
     static DefaultTableModel model = new DefaultTableModel(){

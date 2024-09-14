@@ -114,7 +114,7 @@ public class OknoWczytywaniaBazyDanych extends JDialog {
     }
     private void loadDatabase(String serverName, String portNumber, String databaseName, String username, String password){
         try {
-            BazaDanych.ustawBaze(serverName, portNumber, databaseName, username, password);
+            BazaDanych.changeDatabase(serverName, portNumber, databaseName, username, password);
             //Przypisanie w tej kolejności bo jeżeli ktoś nie poda poprawnych danych logowania to nie chcemy ich zapamietywac
             nazwaSerwera = serverName;
             port = portNumber;
