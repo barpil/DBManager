@@ -25,7 +25,7 @@ abstract public class TabelaSQL extends JTable {
 
 
 
-    private void updateColumnNames(){
+    protected void updateColumnNames(){
         int liczbaKolumn = BazaDanych.getBazaDanych().getInformacjeOTabeli().getLiczbaKolumn();
         String nazwyKolumn[] = new String[liczbaKolumn];
         int i=0;
@@ -35,6 +35,8 @@ abstract public class TabelaSQL extends JTable {
         }
         nazwyKolumnTabeli = nazwyKolumn;
     }
+
+
 
     protected abstract void updateData();
 

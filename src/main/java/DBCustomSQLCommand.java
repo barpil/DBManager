@@ -4,9 +4,11 @@ import java.sql.Statement;
 
 public class DBCustomSQLCommand extends DBConnector implements SQLRunnable {
     private final String textCommand;
-    DBCustomSQLCommand(Connection connection, String textCommand) {
+    private SQLConsole sqlConsole;
+    DBCustomSQLCommand(Connection connection, String textCommand, SQLConsole sqlConsole) {
         super(connection);
         this.textCommand=textCommand;
+        this.sqlConsole=sqlConsole;
     }
 
     @Override
@@ -14,9 +16,25 @@ public class DBCustomSQLCommand extends DBConnector implements SQLRunnable {
         Statement statement = null;
         try {
             statement = connection.createStatement();
-            statement.execute(textCommand);
+            if(sqlConsole.isQuery()){
+                statement.executeQuery(textCommand);
+                sqlConsole.passResult(statement.getResultSet());
+            }
+            else{
+                statement.execute(textCommand);
+            }
+
         } catch (SQLException e) {
-            SQLConsole.poinformujOBledzie();
+            if(e.getErrorCode()==0){
+                try {
+                    statement.execute(textCommand);
+                } catch (SQLException ex) {
+                    SQLConsole.poinformujOBledzie(ex);
+                }
+            }else {
+                SQLConsole.poinformujOBledzie(e);
+            }
+
         } finally {
             assert statement != null;
             try {

@@ -18,6 +18,8 @@ public class OknoWczytywaniaBazyDanych extends JDialog {
             assert autologinProperties != null;
             loadDatabase(autologinProperties.serverName(), autologinProperties.port(),autologinProperties.databaseName(),autologinProperties.username(), autologinProperties.password());
             ConfigFileOperator.autoLoginAlreadyPerformed();
+
+
             return;
         }
         this.setModalityType(ModalityType.APPLICATION_MODAL);
@@ -119,7 +121,11 @@ public class OknoWczytywaniaBazyDanych extends JDialog {
             nazwaBazy = databaseName;
             nazwaUzytkownika = username;
 
-            PanelSterowania.getPanelSterowania().zaktualizujWyborTabelCB();
+            System.out.println(BazaDanych.getBazaDanych().getNazwaTabeli());
+            Menu.getMenu().dodajOpcjeBazyDanych();
+            BazaDanych.getBazaDanych().zaktualizujBaze();
+            PanelElementow.zaladujTabele();
+
 
         }
         catch( SQLSyntaxErrorException ex){

@@ -4,8 +4,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class DBUpdate extends DBConnector implements Runnable{
+    String query;
     DBUpdate(Connection connection) {
         super(connection);
+        query="SELECT * FROM " + BazaDanych.getBazaDanych().getNazwaTabeli() + ";";
+    }
+
+    DBUpdate(Connection connection, String selectQuery){
+        super(connection);
+        query=selectQuery;
     }
 
     @Override
@@ -14,9 +21,10 @@ public class DBUpdate extends DBConnector implements Runnable{
         BazaDanych.getBazaDanych().getDane().clear();
         try {
             statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + BazaDanych.getBazaDanych().getNazwaTabeli() + ";");
-            BazaDanych.getBazaDanych().setInformacjeOTabeli(new InformacjeOTabeli(connection));
+            ResultSet resultSet = statement.executeQuery(query);
+            BazaDanych.getBazaDanych().setInformacjeOTabeli(new InformacjeOTabeli(connection, BazaDanych.getBazaDanych().getInformacjeOBazie(), BazaDanych.getBazaDanych().getNazwaTabeli() ));
             InformacjeOTabeli informacjeOTabeli = BazaDanych.getBazaDanych().getInformacjeOTabeli();
+            System.out.println(BazaDanych.getBazaDanych().getInformacjeOBazie().nazwyTabel());
             {
                 Row dodawanyRzad;
                 int liczbaKolumn = informacjeOTabeli.getLiczbaKolumn();

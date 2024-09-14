@@ -48,7 +48,16 @@ public class OknoEdycjiTabeli extends JDialog {
         topButtonPanel.setLayout(new BoxLayout(topButtonPanel, BoxLayout.X_AXIS));
         JLabel showNewOnlyLabel = new JLabel("New only");
         JCheckBox showNewOnlyCheckbox = new JCheckBox();
-        MyItemListener myItemListener = new MyItemListener();
+        ItemListener myItemListener = e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                tabelaPodgladu.setOnlyNewOption(true);
+                System.out.println("Feature is enabled.");
+            } else {
+                tabelaPodgladu.setOnlyNewOption(false);
+                System.out.println("Feature is disabled.");
+            }
+            tabelaPodgladu.updateModel();
+        };
         showNewOnlyCheckbox.addItemListener(myItemListener);
 
         topButtonPanel.add(Box.createHorizontalGlue());
@@ -230,18 +239,6 @@ public class OknoEdycjiTabeli extends JDialog {
         this.add(panelGlowny);
     }
 
-    class MyItemListener implements ItemListener {
-        public void itemStateChanged(ItemEvent e) {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                tabelaPodgladu.setOnlyNewOption(true);
-                System.out.println("Feature is enabled.");
-            } else {
-                tabelaPodgladu.setOnlyNewOption(false);
-                System.out.println("Feature is disabled.");
-            }
-            tabelaPodgladu.updateModel();
-        }
-    }
 }
 
 

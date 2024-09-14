@@ -16,7 +16,7 @@ public class BazaDanych {
 
         tabele: users, lista
      */
-
+    record InformacjeOBazie(String nazwaBazy, String nazwaWybranejTabeli, List<String> nazwyTabel){};
 
     private String nazwaBazy;
     private final String nazwaSerwera;
@@ -24,10 +24,16 @@ public class BazaDanych {
     private String nazwaTabeli;
     private String nazwaUzytkownika;
     private String hasloUzytkownika;
+    private List<String> nazwyTabel;
     private List<Row> dane = new LinkedList<>();
     private final java.sql.Connection connection;
     private SQLThreadQueue sqlThreadQueue = new SQLThreadQueue();
 
+    public InformacjeOBazie getInformacjeOBazie() {
+        return informacjeOBazie;
+    }
+
+    private InformacjeOBazie informacjeOBazie;
     private InformacjeOTabeli informacjeOTabeli;
 
     private BazaDanych(String nazwaSerwera, String port, String nazwaBazy, String nazwaUzytkownika, String hasloUzytkownika) throws SQLException {
@@ -40,6 +46,10 @@ public class BazaDanych {
             this.nazwaBazy = nazwaBazy;
             this.nazwaUzytkownika = nazwaUzytkownika;
             this.hasloUzytkownika = hasloUzytkownika;
+            informacjeOBazie=new InformacjeOBazie(nazwaBazy, getNazwyTabel().getFirst(), getNazwyTabel());
+            setNazwaTabeli(informacjeOBazie.nazwyTabel.getFirst());
+            this.informacjeOTabeli= new InformacjeOTabeli(connection, informacjeOBazie, nazwaTabeli);
+
 
         }catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
@@ -77,7 +87,7 @@ public class BazaDanych {
     }
 
     public void customSQLCommand(SQLConsole okno, String textCommand){
-        utworzWatek(new DBCustomSQLCommand(connection, textCommand));
+        utworzWatek(new DBCustomSQLCommand(connection, textCommand, okno));
     }
 
     public void sortujDane(String by, String order) throws SQLException {
@@ -86,7 +96,7 @@ public class BazaDanych {
         try {
             statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT * FROM "+ nazwaTabeli+" ORDER BY " + by + " " + order + ";");
-            informacjeOTabeli = new InformacjeOTabeli(connection);
+
             {
                 Row dodawanyRzad;
                 int liczbaKolumn = informacjeOTabeli.getLiczbaKolumn();
@@ -120,6 +130,7 @@ public class BazaDanych {
 
     public static void ustawBaze(String nazwaSerwera, String port, String nazwaBazy, String nazwaUzytkownika, String hasloUzytkownika) throws SQLException {
         bazaDanych = new BazaDanych(nazwaSerwera, port, nazwaBazy, nazwaUzytkownika, hasloUzytkownika);
+
     }
 
     private void utworzWatek(SQLRunnable runnable){
@@ -143,17 +154,19 @@ public class BazaDanych {
     }
 
     public List<String> getNazwyTabel() throws SQLException {
-        List<String> tabele = new ArrayList<>(0);
-        Statement statement = connection.createStatement();
-        String getTablesQueries = "SHOW TABLES;";
+        if (nazwyTabel==null) {
+            nazwyTabel = new ArrayList<>(0);
+            Statement statement = connection.createStatement();
+            String getTablesQueries = "SHOW TABLES;";
 
-        ResultSet resultSet = statement.executeQuery(getTablesQueries);
-        while(resultSet.next()){
-            String nazwa = resultSet.getString(1);
-            tabele.add(nazwa);
+            ResultSet resultSet = statement.executeQuery(getTablesQueries);
+            while(resultSet.next()){
+                String nazwa = resultSet.getString(1);
+                nazwyTabel.add(nazwa);
 
+            }
         }
-        return tabele;
+        return nazwyTabel;
     }
 
     public InformacjeOTabeli getInformacjeOTabeli() {return informacjeOTabeli;}

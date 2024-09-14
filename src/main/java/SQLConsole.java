@@ -1,10 +1,14 @@
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.List;
 
 public class SQLConsole extends JDialog {
+    private TabelaWyswietlaniaWynikow tabelaWyswietlaniaWynikow;
     SQLConsole(Frame frame, String nazwaOkna, boolean modal) {
         super(frame, nazwaOkna, modal);
         this.setSize(new Dimension(400, 400));
@@ -15,26 +19,79 @@ public class SQLConsole extends JDialog {
     }
 
     private void dodajComponenty() {
-        JPanel panelGlowny = new JPanel();
-        panelGlowny.setLayout(new BorderLayout());
+        JPanel panelOkna = new JPanel();
+        panelOkna.setLayout(new BoxLayout(panelOkna, BoxLayout.Y_AXIS));
+        JPanel panelSterowania = new JPanel();
+        panelSterowania.setLayout(new BoxLayout(panelSterowania, BoxLayout.X_AXIS));
+
+        JPanel panelElementow = new JPanel();
+        panelElementow.setLayout(new BoxLayout(panelElementow, BoxLayout.X_AXIS));
+
+        JPanel panelWyswietlaniaWynikow = new JPanel();
+        panelWyswietlaniaWynikow.setPreferredSize(new Dimension(0, 0));
+
+        JScrollPane scrollPaneTabeli = new JScrollPane();
+
+        // Konfiguracja tabeli
+        tabelaWyswietlaniaWynikow = new TabelaWyswietlaniaWynikow(false);
+        tabelaWyswietlaniaWynikow.setVisible(false);
+        tabelaWyswietlaniaWynikow.setPreferredScrollableViewportSize(new Dimension(400, 400));
+        tabelaWyswietlaniaWynikow.setFillsViewportHeight(true);  // Wypełnia przestrzeń
+        tabelaWyswietlaniaWynikow.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);  // Dopasowuje kolumny
+
+        scrollPaneTabeli.setViewportView(tabelaWyswietlaniaWynikow);
+        scrollPaneTabeli.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);  // Przewijanie pionowe
+        scrollPaneTabeli.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);  // Przewijanie poziome
+
+        panelWyswietlaniaWynikow.add(scrollPaneTabeli);
+
+        JLabel showQueryResultLabel = new JLabel("Show result");
+        JCheckBox showQueryResultCB = new JCheckBox();
+
+        // Obsługa checkboxa
+        ItemListener myItemListener = e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                panelWyswietlaniaWynikow.setPreferredSize(new Dimension(400, 400));
+                tabelaWyswietlaniaWynikow.setVisible(true);
+                tabelaWyswietlaniaWynikow.updateModel();
+                tabelaWyswietlaniaWynikow.revalidate();
+                tabelaWyswietlaniaWynikow.repaint();
+                this.pack();  // Dostosowanie rozmiaru okna
+            } else {
+                panelWyswietlaniaWynikow.setPreferredSize(new Dimension(0, 0));
+                tabelaWyswietlaniaWynikow.setVisible(false);
+                this.revalidate();
+                tabelaWyswietlaniaWynikow.repaint();
+                this.pack();  // Dostosowanie okna po ukryciu tabeli
+            }
+        };
+        showQueryResultCB.addItemListener(myItemListener);
+
+        panelSterowania.add(Box.createHorizontalGlue());
+        panelSterowania.add(showQueryResultLabel);
+        panelSterowania.add(showQueryResultCB);
+
+        JPanel panelPolecen = new JPanel();
+        panelPolecen.setLayout(new BorderLayout());
+        panelPolecen.setPreferredSize(new Dimension(400, 350));
 
         // Panel tekstowy z JTextArea
-        JTextArea textArea = new JTextArea(new String("Insert SQL command"));
+        JTextArea textArea = new JTextArea("Insert SQL command");
         textArea.addMouseListener(new MouseAdapter() {
             boolean czyJuzKlikniete = false;
+
             @Override
             public void mousePressed(MouseEvent e) {
-                super.mousePressed(e);
-                if(!czyJuzKlikniete){
+                if (!czyJuzKlikniete) {
                     textArea.setText("");
-                    czyJuzKlikniete=true;
+                    czyJuzKlikniete = true;
                 }
             }
         });
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
         JScrollPane scrollPane = new JScrollPane(textArea);
-        panelGlowny.add(scrollPane, BorderLayout.CENTER);
+        panelPolecen.add(scrollPane, BorderLayout.CENTER);
 
         JPanel panelPrzyciskow = new JPanel();
         panelPrzyciskow.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -46,6 +103,7 @@ public class SQLConsole extends JDialog {
             runCommand(textArea.getText());
             BazaDanych.getBazaDanych().getSqlThreadQueue().rozpocznijWykonywanie();
         });
+
         InputMap inputMap = runButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap = runButton.getActionMap();
         KeyStroke keyStroke = KeyStroke.getKeyStroke("control R");
@@ -66,17 +124,123 @@ public class SQLConsole extends JDialog {
         panelPrzyciskow.add(runButton);
         panelPrzyciskow.add(cancelButton);
 
-        panelGlowny.add(panelPrzyciskow, BorderLayout.SOUTH);
+        panelPolecen.add(panelPrzyciskow, BorderLayout.SOUTH);
 
-        this.add(panelGlowny);
+        panelElementow.add(panelPolecen);
+
+        panelWyswietlaniaWynikow.setBackground(Color.BLACK);
+        panelElementow.add(panelWyswietlaniaWynikow);
+
+        panelOkna.add(panelSterowania);
+        panelOkna.add(panelElementow);
+
+        this.add(panelOkna);
     }
 
     private void runCommand(String textCommand) {
         BazaDanych.getBazaDanych().customSQLCommand(this, textCommand);
     }
 
-    public static void poinformujOBledzie(){
-        JOptionPane.showMessageDialog(OknoGlowne.getOknoGlowne(), "A SQL error occured.\nPlease check the syntax and correctness of the command", "SQL error", JOptionPane.ERROR_MESSAGE);
+    public static void poinformujOBledzie(SQLException e){
+        String wiadomoscKomunikatu = "A SQL error occured.\nPlease check the syntax and correctness of the command <br> Error message:<br><font color='red'>"+e.getMessage()+"</font>";
+        JLabel komunikat = new JLabel("<html><body style='width: 300px'>" + wiadomoscKomunikatu + "</body></html>");
+        JOptionPane.showMessageDialog(OknoGlowne.getOknoGlowne(), komunikat, "SQL error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public boolean isQuery(){
+        return tabelaWyswietlaniaWynikow.isVisible();
+    }
+
+    public void passResult(ResultSet resultSet){
+        tabelaWyswietlaniaWynikow.resultSet=resultSet;
+
+        tabelaWyswietlaniaWynikow.updateModel();
+    }
+
+}
+
+class TabelaWyswietlaniaWynikow extends TabelaSQL{
+    DefaultTableModel model;
+    ResultSet resultSet=null;
+    TabelaWyswietlaniaWynikow(boolean isCellEditable) {
+        super(isCellEditable);
+    }
+
+
+    @Override
+    protected void updateColumnNames(){
+        if (resultSet!=null&& isVisible()) {
+            int liczbaKolumn = 0;
+            try {
+                liczbaKolumn = resultSet.getMetaData().getColumnCount();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            String nazwyKolumn[] = new String[liczbaKolumn];
+
+            try {
+                for(int i=0; i<resultSet.getMetaData().getColumnCount();i++){
+                    nazwyKolumn[i]= resultSet.getMetaData().getColumnName(i+1);
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            nazwyKolumnTabeli = nazwyKolumn;
+        }
+    }
+
+    @Override
+    protected void updateData() {
+        if(isVisible()&&resultSet!=null){
+            daneTabeli= przygotujDaneTabeli();
+        }
+    }
+
+    private Object[][] przygotujDaneTabeli() {
+        Object[][] wynik=new Object[0][0];
+        try {
+            List<Row> listaDanych = new LinkedList<>();
+            Row dodawanyRzad;
+            int liczbaKolumn = resultSet.getMetaData().getColumnCount();
+
+            while (resultSet.next()) {
+                dodawanyRzad = new Row(liczbaKolumn);
+
+//Musze naprawic scrollPane bo nie pokazuje calej tabeli
+                for (int i = 0; i < liczbaKolumn; i++) {
+                    String nazwaKolumny = resultSet.getMetaData().getColumnName(i+1);
+                    switch (resultSet.getMetaData().getColumnTypeName(i+1).toLowerCase()) {
+                        case "int":
+                            dodawanyRzad.addPole(nazwaKolumny, resultSet.getInt(nazwaKolumny));
+                            break;
+                        case "varchar":
+                            dodawanyRzad.addPole(nazwaKolumny, resultSet.getString(nazwaKolumny));
+                            break;
+                        default:
+                            dodawanyRzad.addPole(nazwaKolumny + " (type error)", null);
+                            System.out.println(resultSet.getMetaData().getColumnTypeName(i+1));
+                            break; //Mozna dodac informacje o bledzie
+                    }
+
+                }
+                listaDanych.add(dodawanyRzad);
+
+
+            }
+
+            wynik= new Object[listaDanych.size()][resultSet.getMetaData().getColumnCount()];
+            for(int j=0;j< listaDanych.size();j++){
+                for(int k=0;k<liczbaKolumn;k++){
+                    wynik[j][k] = listaDanych.get(j).getPole(k).getWartosc();
+                    System.out.print(listaDanych.get(j).getPole(k).getWartosc()+" ");
+                }
+                System.out.println();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        resultSet=null;
+        return wynik;
     }
 
 }

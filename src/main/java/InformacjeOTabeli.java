@@ -33,24 +33,24 @@ public class InformacjeOTabeli {
     private String kluczGlowny;
     private List<Kolumna> listaKolumn;
     private Connection connection;
-    InformacjeOTabeli(Connection connection){
+    InformacjeOTabeli(Connection connection, BazaDanych.InformacjeOBazie informacjeOBazie, String nazwaTabeli){
         informacjeOTabeli=this;
         this.connection=connection;
         try {
-            ustalKluczGlowny();
-            zaktualizujListeKolumn();
+            ustalKluczGlowny(informacjeOBazie, nazwaTabeli);
+            zaktualizujListeKolumn(informacjeOBazie, nazwaTabeli);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void ustalKluczGlowny() throws SQLException {
+    private void ustalKluczGlowny(BazaDanych.InformacjeOBazie informacjeOBazie, String nazwaTabeli) throws SQLException {
         Statement statement = null;
         try{
             statement = connection.createStatement();
             String getKluczGlownyQuery ="SELECT COLUMN_NAME " +
                     "FROM INFORMATION_SCHEMA.COLUMNS " +
-                    "WHERE TABLE_NAME='"+BazaDanych.getBazaDanych().getNazwaTabeli()+"' AND TABLE_SCHEMA = '"+BazaDanych.getBazaDanych().getNazwaBazy()+"' AND COLUMN_KEY = 'PRI';";
+                    "WHERE TABLE_NAME='"+nazwaTabeli+"' AND TABLE_SCHEMA = '"+informacjeOBazie.nazwaBazy()+"' AND COLUMN_KEY = 'PRI';";
             ResultSet resultSet= statement.executeQuery(getKluczGlownyQuery);
             resultSet.next();
             kluczGlowny=resultSet.getString(1);
@@ -62,14 +62,14 @@ public class InformacjeOTabeli {
         }
     }
 
-    private void zaktualizujListeKolumn() throws SQLException {
+    private void zaktualizujListeKolumn(BazaDanych.InformacjeOBazie informacjeOBazie, String nazwaTabeli) throws SQLException {
         listaKolumn = new LinkedList<>();
         Statement statement = null;
         try{
             statement = connection.createStatement();
             String getKolumnyQuery ="SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE " +
                     "FROM INFORMATION_SCHEMA.COLUMNS " +
-                    "WHERE TABLE_NAME='"+BazaDanych.getBazaDanych().getNazwaTabeli()+"' AND TABLE_SCHEMA = '"+BazaDanych.getBazaDanych().getNazwaBazy()+"';";
+                    "WHERE TABLE_NAME='"+nazwaTabeli+"' AND TABLE_SCHEMA = '"+informacjeOBazie.nazwaBazy()+"';";
             ResultSet resultSet= statement.executeQuery(getKolumnyQuery);
             while(resultSet.next()){
                 listaKolumn.add(new Kolumna(resultSet.getString("COLUMN_NAME"),resultSet.getString("DATA_TYPE"), resultSet.getString("IS_NULLABLE")));
