@@ -1,5 +1,6 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.SQLException;
@@ -18,6 +19,10 @@ abstract public class TabelaSQL extends JTable {
                 return isCellEditable;
             }
         };
+        this.setShowGrid(true);
+        this.setGridColor(Color.GRAY);
+        this.setFocusable(false);
+
         updateModel();
 
 

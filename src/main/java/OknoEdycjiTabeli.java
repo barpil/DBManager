@@ -85,6 +85,7 @@ public class OknoEdycjiTabeli extends JDialog {
 
             TabelaDodawaniaWierszy() {
                 super(true);
+                this.getTableHeader().setReorderingAllowed(false);
             }
 
             @Override
@@ -150,6 +151,8 @@ public class OknoEdycjiTabeli extends JDialog {
 
 
         JScrollPane dolnyScrollPane = new JScrollPane();
+        dolnyScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        dolnyScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         TabelaDodawaniaWierszy tabelaDodawaniaWierszy = new TabelaDodawaniaWierszy();
         dolnyScrollPane.setViewportView(tabelaDodawaniaWierszy);
         dolnyScrollPane.setPreferredSize(new Dimension(400, 50));
@@ -280,6 +283,7 @@ class TabelaEdycji extends TabelaSQL {
 
     TabelaEdycji(){
         super(false);
+        this.getTableHeader().setReorderingAllowed(false);
         daneBazy=new LinkedList<>();
         daneBazy.addAll(BazaDanych.getBazaDanych().getDane());
         updateModel();

@@ -22,5 +22,4 @@ Zrobić aplikację okienkową, która pozwoli na:
 - [ ] Zaznaczanie, które kolumny tabeli mają nam być pokazywane
 
 ### Co koniecznie trzeba zmienić:
-- Konsola SQL nie pokazuje kwerend, które zostają wpisane. Działa jedynie z poleceniami, jak np. INSERT i DELETE.
 - Dodanie usuwania tekstu domyślnego ("Insert SQL query") z konsoli SQL po wpisaniu znaku. Na razie znika on jedynie po kliknięciu myszką.
