@@ -121,7 +121,6 @@ public class OknoWczytywaniaBazyDanych extends JDialog {
             nazwaBazy = databaseName;
             nazwaUzytkownika = username;
 
-            System.out.println(BazaDanych.getBazaDanych().getNazwaTabeli());
             Menu.getMenu().dodajOpcjeBazyDanych();
             BazaDanych.getBazaDanych().zaktualizujBaze();
             PanelElementow.zaladujTabele();

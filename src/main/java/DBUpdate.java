@@ -24,7 +24,6 @@ public class DBUpdate extends DBConnector implements Runnable{
             ResultSet resultSet = statement.executeQuery(query);
             BazaDanych.getBazaDanych().setInformacjeOTabeli(new InformacjeOTabeli(connection, BazaDanych.getBazaDanych().getInformacjeOBazie(), BazaDanych.getBazaDanych().getNazwaTabeli() ));
             InformacjeOTabeli informacjeOTabeli = BazaDanych.getBazaDanych().getInformacjeOTabeli();
-            System.out.println(BazaDanych.getBazaDanych().getInformacjeOBazie().nazwyTabel());
             {
                 Row dodawanyRzad;
                 int liczbaKolumn = informacjeOTabeli.getLiczbaKolumn();

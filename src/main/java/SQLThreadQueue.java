@@ -1,11 +1,12 @@
 import javax.swing.*;
 import java.sql.SQLException;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 public class SQLThreadQueue {
     final int LICZBA_OBSLUGIWANYCH_WATKOW = 2; //Mozna dodac do config file'a liczbe obslugiwanych watkow
-
+    private List<Exception> listaBledowPodczasWykonywania;
     private int liczbaZajetychWatkow = 0;
     private final Queue<Thread> threadQueue = new LinkedList<>();
     private final Object lock = new Object();
@@ -17,6 +18,7 @@ public class SQLThreadQueue {
     }
 
     public synchronized void rozpocznijWykonywanie() {
+        listaBledowPodczasWykonywania= new LinkedList<>();
         progressBar = PanelSterowania.getPanelSterowania().getProgressBar();
         progressBar.przygotujProgressBar();
 
@@ -85,5 +87,11 @@ public class SQLThreadQueue {
     public void resetQueue(){
         threadQueue.clear();
         System.out.println("Kolejka watkow wyczyszczona");
+    }
+    public void logError(Exception e){
+        listaBledowPodczasWykonywania.add(e);
+    }
+    public List<Exception> getErrors(){
+        return listaBledowPodczasWykonywania;
     }
 }

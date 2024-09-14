@@ -1,3 +1,5 @@
+import javax.swing.*;
+import java.awt.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -62,7 +64,7 @@ public class DBAddData extends DBConnector implements SQLRunnable{
             
             statement.execute(insertQuery);
         } catch (SQLException e) {
-            throw new RuntimeException();
+            BazaDanych.getBazaDanych().getSqlThreadQueue().logError(e);
         } finally {
             assert statement != null;
             try {

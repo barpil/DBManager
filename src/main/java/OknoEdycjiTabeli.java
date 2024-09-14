@@ -3,6 +3,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,7 +13,11 @@ public class OknoEdycjiTabeli extends JDialog {
         super(frame, nazwaOkna, modal);
         this.setSize(new Dimension(400, 400));
         this.setResizable(true);
-
+        try {
+            BazaDanych.getBazaDanych().zaktualizujBaze();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         dodajComponenty();
         this.setVisible(true);
     }
@@ -51,10 +56,8 @@ public class OknoEdycjiTabeli extends JDialog {
         ItemListener myItemListener = e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 tabelaPodgladu.setOnlyNewOption(true);
-                System.out.println("Feature is enabled.");
             } else {
                 tabelaPodgladu.setOnlyNewOption(false);
-                System.out.println("Feature is disabled.");
             }
             tabelaPodgladu.updateModel();
         };
@@ -205,7 +208,6 @@ public class OknoEdycjiTabeli extends JDialog {
 
         JButton applyButton = new JButton("Apply");
 
-        //Zrobic sprawdzanie czy pola ktora sa w bazie oznaczone jako not null sa napewno uzupelnione
 
 
         applyButton.setPreferredSize(new Dimension(60,20));
@@ -220,7 +222,29 @@ public class OknoEdycjiTabeli extends JDialog {
                     throw new RuntimeException(ex);
                 }
             }
-            this.dispose();
+            if(BazaDanych.getBazaDanych().getSqlThreadQueue().getErrors().isEmpty()){
+                this.dispose();
+            } else{
+                PanelSterowania.getPanelSterowania().getProgressBar().setVisible(false);
+                String wiadomoscKomunikatu;
+                JLabel komunikat;
+                SQLException sqlException = (SQLException) BazaDanych.getBazaDanych().getSqlThreadQueue().getErrors().getFirst();
+                switch (sqlException.getErrorCode()){
+                    case 1062:
+                        wiadomoscKomunikatu = "Primary key duplicate error.\nPlease remove duplicate data.<br> Error message:<br><font color='red'>"+sqlException.getMessage()+"</font>";
+                        komunikat = new JLabel("<html><body style='width: 300px'>" + wiadomoscKomunikatu + "</body></html>");
+                        JOptionPane.showMessageDialog(OknoGlowne.getOknoGlowne(), komunikat,"Duplicate data error",JOptionPane.ERROR_MESSAGE);
+                        break;
+                    default:
+                        wiadomoscKomunikatu = "An unexpected SQL error has occured.\nPlease check the data correctness or try again later.<br> Error message:<br><font color='red'>"+sqlException.getMessage()+"</font>";
+                        komunikat = new JLabel("<html><body style='width: 300px'>" + wiadomoscKomunikatu + "</body></html>");
+                        JOptionPane.showMessageDialog(OknoGlowne.getOknoGlowne(), komunikat,"Data insert error",JOptionPane.ERROR_MESSAGE);
+                }
+            }
+
+
+
+
         });
         JButton cancelButton = new JButton("Cancel");
         cancelButton.setPreferredSize(new Dimension(60,20));
@@ -258,7 +282,6 @@ class TabelaEdycji extends TabelaSQL {
         super(false);
         daneBazy=new LinkedList<>();
         daneBazy.addAll(BazaDanych.getBazaDanych().getDane());
-        System.out.println(daneBazy);
         updateModel();
         PopUpMenuTabeliEdycji popUpMenuTabeli = new PopUpMenuTabeliEdycji(this);
     }

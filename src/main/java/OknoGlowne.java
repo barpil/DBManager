@@ -6,7 +6,7 @@ public class OknoGlowne extends JFrame {
         this.setSize(500,500);
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setVisible(true);
-        this.setLayout(new BoxLayout(getContentPane(), BoxLayout.LINE_AXIS));
+        this.setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
         stworzComponenty();
         this.revalidate();
 

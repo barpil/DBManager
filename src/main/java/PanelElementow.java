@@ -12,8 +12,7 @@ public class PanelElementow extends JScrollPane{
         }
     };
     private PanelElementow() {
-        this.setPreferredSize(new Dimension(350, 500));
-        this.setBackground(Color.GREEN);
+        this.setPreferredSize(new Dimension(500, 500));
         utworzElementy();
         if(BazaDanych.getBazaDanych()!=null){
             zaladujTabele();

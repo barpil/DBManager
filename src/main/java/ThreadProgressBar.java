@@ -10,7 +10,8 @@ public class ThreadProgressBar extends JProgressBar {
 
     ThreadProgressBar(){
 
-            this.setMinimumSize(new Dimension(150, 50));
+            this.setMinimumSize(new Dimension(80, 20));
+            this.setMaximumSize(new Dimension(80,20));
             this.setMinimum(MIN_VALUE);
             this.setMaximum(MAX_VALUE);
 
