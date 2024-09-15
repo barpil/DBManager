@@ -34,7 +34,6 @@ public class DBAddData implements SQLRunnable{
             String[] nazwyKolumn= InformacjeOBazie.getActiveTableInfo().getNazwyKolumn();
             int liczbaKolumn = InformacjeOBazie.getActiveTableInfo().getLiczbaKolumn();
             for(int numerKolumny=0;numerKolumny<liczbaKolumn;numerKolumny++){
-                System.out.println("Nazwa: "+nazwyKolumn[numerKolumny]);
                 insertCommand+=nazwyKolumn[numerKolumny];
                 if(numerKolumny!=liczbaKolumn-1){
                     insertCommand+=", ";
@@ -45,10 +44,10 @@ public class DBAddData implements SQLRunnable{
                 insertCommand+=" (";
                 for(int numerKolumny=0;numerKolumny<liczbaKolumn;numerKolumny++){
                     switch (InformacjeOBazie.getActiveTableInfo().getInformacjaOKolumnie(numerKolumny, InformacjeOTabeli.InformacjeKolumny.TYP_DANYCH_KOLUMNY)){
-                        case "int", "bit", "decimal":
+                        case "int", "tinyint", "decimal", "date":
                             insertCommand+=dodawaneDane.get(numerWiersza).getPole(numerKolumny).getWartosc();
                             break;
-                        case "varchar", "date", "boolean", "time":
+                        case "varchar", "nvarchar", "boolean", "time":
                             insertCommand+="'"+dodawaneDane.get(numerWiersza).getPole(numerKolumny).getWartosc()+"'";
                             break;
 

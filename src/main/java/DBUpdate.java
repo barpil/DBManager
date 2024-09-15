@@ -39,7 +39,7 @@ public class DBUpdate implements Runnable{
                             case "int":
                                 dodawanyRzad.addPole(nazwaKolumny, resultSet.getInt(nazwaKolumny));
                                 break;
-                            case "varchar":
+                            case "varchar", "nvarchar":
                                 dodawanyRzad.addPole(nazwaKolumny, resultSet.getString(nazwaKolumny));
                                 break;
                             case "date":
@@ -48,7 +48,7 @@ public class DBUpdate implements Runnable{
                             case "decimal":
                                 dodawanyRzad.addPole(nazwaKolumny, resultSet.getBigDecimal(nazwaKolumny));
                                 break;
-                            case "bit":
+                            case "tinyint":
                                 dodawanyRzad.addPole(nazwaKolumny, resultSet.getShort(nazwaKolumny));
                                 break;
                             case "boolean":

@@ -215,7 +215,7 @@ class TabelaWyswietlaniaWynikow extends TabelaSQL{
                         case "int":
                             dodawanyRzad.addPole(nazwaKolumny, resultSet.getInt(nazwaKolumny));
                             break;
-                        case "varchar":
+                        case "varchar", "nvarchar":
                             dodawanyRzad.addPole(nazwaKolumny, resultSet.getString(nazwaKolumny));
                             break;
                         case "date":
@@ -224,7 +224,7 @@ class TabelaWyswietlaniaWynikow extends TabelaSQL{
                         case "decimal":
                             dodawanyRzad.addPole(nazwaKolumny, resultSet.getBigDecimal(nazwaKolumny));
                             break;
-                        case "bit":
+                        case "tinyint":
                             dodawanyRzad.addPole(nazwaKolumny, resultSet.getShort(nazwaKolumny));
                             break;
                         case "boolean":
@@ -236,7 +236,7 @@ class TabelaWyswietlaniaWynikow extends TabelaSQL{
                         default:
                             dodawanyRzad.addPole(nazwaKolumny + " (type error)", null);
                             log.error("Unknown data type encountered while trying to add data to table: {}", resultSet.getMetaData().getColumnTypeName(i+1).toLowerCase());
-                            break; //Mozna dodac informacje o bledzie
+                            break;
                     }
 
                 }
