@@ -9,16 +9,6 @@ public class BazaDanych {
     private static BazaDanych bazaDanych;
     private final Logger log = LoggerFactory.getLogger(BazaDanych.class);
 
-    /*
-        nazwaSerwera: localhost
-        port: 3306
-        nazwaBazy: bazatestowa
-        nazwaUzytkownika: root
-        haslo: TestowanieSQL1
-
-        tabele: users, lista
-     */
-
     private final List<Row> dane = new LinkedList<>();
 
     private BazaDanych(String nazwaSerwera, String port, String nazwaBazy, String nazwaUzytkownika, String hasloUzytkownika) throws SQLException {
