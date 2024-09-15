@@ -13,13 +13,12 @@ Zrobić aplikację okienkową, która pozwoli na:
 - [x] Dostosowanie aplikacji do dowolnej wczytanej bazy danych
 - [x] Możliwość wczytania dowolnej bazy danych
 - [x] Możliwość wpisania dowolnego polecenia SQL
-- [ ] Dodanie loggera błędów
+- [x] Dodanie loggera błędów
 - [ ] Dostosowanie aplikacji do baz innych niż MySql
-- [ ] Zastanowienie się nad własnymi wyjątkami i czy są potrzebne
-- [ ] Refaktoryzacja kodu
+- [x] Refaktoryzacja kodu
 
 ### Pomysły co dodać do projektu:
 - [ ] Zaznaczanie, które kolumny tabeli mają nam być pokazywane
 
 ### Co koniecznie trzeba zmienić:
-- Dodanie usuwania tekstu domyślnego ("Insert SQL query") z konsoli SQL po wpisaniu znaku. Na razie znika on jedynie po kliknięciu myszką.
+- Jest błąd z sortowaniem danych innego typu niż String i int.
