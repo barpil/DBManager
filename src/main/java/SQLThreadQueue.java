@@ -1,19 +1,23 @@
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.swing.*;
-import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
 public class SQLThreadQueue {
-    static final int LICZBA_OBSLUGIWANYCH_WATKOW = 2; //Mozna dodac do config file'a liczbe obslugiwanych watkow
+    private static final Logger log = LoggerFactory.getLogger(SQLThreadQueue.class);
+    static final int LICZBA_OBSLUGIWANYCH_WATKOW = 2;
     private static List<Exception> listaBledowPodczasWykonywania;
     private static int liczbaZajetychWatkow = 0;
     private static final Queue<Thread> threadQueue = new LinkedList<>();
     private static final Object lock = new Object();
 
     public static void dodajWatek(SQLRunnable runnable){
-        threadQueue.add(new Thread(runnable));
-        System.out.println("Dodano wątek.");
+        Thread thread = new Thread(runnable);
+        threadQueue.add(thread);
+        log.debug("Thread added to queue: {}", thread.getName());
     }
 
     public static synchronized void rozpocznijWykonywanie() {
@@ -22,7 +26,7 @@ public class SQLThreadQueue {
 
         Thread thread = new Thread(() -> {
             if (!threadQueue.isEmpty()) {
-                System.out.println("Rozpoczeto wykonywanie watkow!");
+                log.debug("Thread queue started...");
                 liczbaZajetychWatkow = 0;
 
                 while(!threadQueue.isEmpty()) {
@@ -34,7 +38,7 @@ public class SQLThreadQueue {
                         }
                     }
                     while(liczbaZajetychWatkow >= LICZBA_OBSLUGIWANYCH_WATKOW) {
-                        System.out.println("Czekanie...");
+                        log.debug("Queue full, waiting for current threads to resolve. ({} threads left)", liczbaPozostalychWatkow());
                         try {
                             synchronized (lock) {
                                 lock.wait();
@@ -48,11 +52,7 @@ public class SQLThreadQueue {
             }
 
             PanelSterowania.getPanelSterowania().getProgressBar().setValue(PanelSterowania.getPanelSterowania().getProgressBar().getMaximum());
-            System.out.println("Zakonczono wątki. Liczba pozostalych watkow: "+liczbaPozostalychWatkow());
-
-            BazaDanych.getBazaDanych().zaktualizujBaze();
-            PanelElementow.zaladujTabele();
-
+            log.debug("All threads in queue have been executed");
 
         });
 
@@ -79,7 +79,7 @@ public class SQLThreadQueue {
 
     public static void resetQueue(){
         threadQueue.clear();
-        System.out.println("Kolejka watkow wyczyszczona");
+        log.debug("Thread queue has been cleared");
     }
     public static void logError(Exception e){
         listaBledowPodczasWykonywania.add(e);

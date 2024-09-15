@@ -1,4 +1,6 @@
 import com.mysql.cj.x.protobuf.Mysqlx;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.io.FileNotFoundException;
@@ -21,6 +23,7 @@ public class ConfigFileOperator {
 
     private final static Properties properties = new Properties();
     private static boolean czyZaladowane = false;
+    private static final Logger log = LoggerFactory.getLogger(ConfigFileOperator.class);
 
     static {
         loadProperties(CONFIG_FILE_PATH);
@@ -39,6 +42,7 @@ public class ConfigFileOperator {
                 properties.load(configFileReader);
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(OknoGlowne.getOknoGlowne(),"Unable to load the configuration file. Please ensure that the file exists and is accessible.", "Config file error", JOptionPane.ERROR_MESSAGE);
+                log.error("Config file error, Unable to load the configuration file");
                 OknoGlowne.getOknoGlowne().dispose();
                 System.exit(1);
             }
@@ -58,16 +62,16 @@ public class ConfigFileOperator {
         }
         if(!unprovidedProperties.isEmpty()){
             String message="Not all required properties are present in the configuration file.\nPlease ensure that the configuration file contains all necessary\nproperties for the application to function correctly.\nMissing properties:\n";
+            String missingProperties="";
             for(int i=0; i< unprovidedProperties.size();i++){
-                message+="\n"+unprovidedProperties.get(i);
+                missingProperties+="\n"+unprovidedProperties.get(i);
             }
-            JOptionPane.showMessageDialog(OknoGlowne.getOknoGlowne(), message, "Config file error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(OknoGlowne.getOknoGlowne(), message+missingProperties, "Config file error", JOptionPane.ERROR_MESSAGE);
+            log.error("Missing config file properties: {}", missingProperties);
             return false;
         }
         return true;
     }
-
-    private ConfigFileOperator(){}
 
     private static boolean getBooleanPropertyValue(String s){
         switch (s.toLowerCase()){
@@ -76,7 +80,7 @@ public class ConfigFileOperator {
             case "false":
                 return false;
             default:
-                System.out.println("Error: Invalid boolean property value: \""+s+"\". Property set to false");
+                log.error("Invalid configfile boolean property value: \"{}\". Property set to false",s);
                 return false;
         }
     }
@@ -89,7 +93,7 @@ public class ConfigFileOperator {
         properties.setProperty("autologin.enabled", "false");
     }
 
-    public record AutologinProperties(String serverName, String port, String databaseName, String username, String password){};
+    public record AutologinProperties(String serverName, String port, String databaseName, String username, String password){}
 
     public static AutologinProperties getAutologinProperties(){
         if(isAutologinEnabled()){

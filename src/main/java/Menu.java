@@ -78,21 +78,14 @@ public class Menu extends JMenuBar {
         }
     }
 
-    public void zaktualizujOpcjeWyboruTabel(){
-        JMenu menuGlowne = (JMenu) this.getMenu(0);
-        //(JMenu) menuGlowne.getItem(1).
-    }
-
-
     private void otworzKonsoleSQL() {
-        SQLConsole sqlConsole = new SQLConsole(OknoGlowne.getOknoGlowne(), "SQL console", false);
+        new SQLConsole(OknoGlowne.getOknoGlowne(), "SQL console", false);
     }
 
     private void edytujTabele() {
-        OknoEdycjiTabeli oknoEdytowaniaTabeli = new OknoEdycjiTabeli(OknoGlowne.getOknoGlowne(), "Edytuj tabelę", true);
+        new OknoEdycjiTabeli(OknoGlowne.getOknoGlowne(), "Edytuj tabelę", true);
         BazaDanych.getBazaDanych().zaktualizujBaze();
         PanelElementow.zaladujTabele();
-
     }
 
     public static Menu getMenu() {

@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
+
+
 public class OknoEdycjiTabeli extends JDialog {
     TabelaEdycji tabelaPodgladu;
     OknoEdycjiTabeli(Frame frame, String nazwaOkna, boolean modal) {
@@ -367,8 +369,6 @@ public List<Row> getData(){
             deleteRows.addActionListener(e -> {
 
                 int[] selectedRows = tabela.getSelectedRows();
-
-                //Zalozenie zeby to dzialalo to nieistnienie sortowania tej tabeli
                 List<Integer> listaDoUsunieciaZBazy = new LinkedList<>();
                 List<Integer> listaDoUsunieciaZNowych = new LinkedList<>();
                 for(int row: selectedRows){

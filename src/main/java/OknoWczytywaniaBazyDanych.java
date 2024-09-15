@@ -1,4 +1,6 @@
 import com.mysql.cj.jdbc.exceptions.CommunicationsException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -115,7 +117,6 @@ public class OknoWczytywaniaBazyDanych extends JDialog {
     private void loadDatabase(String serverName, String portNumber, String databaseName, String username, String password){
         try {
             BazaDanych.changeDatabase(serverName, portNumber, databaseName, username, password);
-            //Przypisanie w tej kolejności bo jeżeli ktoś nie poda poprawnych danych logowania to nie chcemy ich zapamietywac
             nazwaSerwera = serverName;
             port = portNumber;
             nazwaBazy = databaseName;

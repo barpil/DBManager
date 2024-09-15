@@ -1,8 +1,13 @@
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactoryFriend;
+
 import java.sql.*;
 import java.util.*;
 
 public class BazaDanych {
     private static BazaDanych bazaDanych;
+    private final Logger log = LoggerFactory.getLogger(BazaDanych.class);
 
     /*
         nazwaSerwera: localhost
@@ -17,6 +22,7 @@ public class BazaDanych {
     private final List<Row> dane = new LinkedList<>();
 
     private BazaDanych(String nazwaSerwera, String port, String nazwaBazy, String nazwaUzytkownika, String hasloUzytkownika) throws SQLException {
+        log.debug("Database changed to {} [Servername:{}, Port:{}]",nazwaBazy,nazwaSerwera,port);
         InformacjeOBazie.createDataBaseInfo(nazwaSerwera, port, nazwaBazy, nazwaUzytkownika, hasloUzytkownika);
     }
 
@@ -37,18 +43,18 @@ public class BazaDanych {
     }
 
     public void dodajDane(List<Row> dane) {
-        utworzWatek(new DBAddData(InformacjeOBazie.getConnection(), dane));
+        SQLThreadQueue.dodajWatek(new DBAddData(InformacjeOBazie.getConnection(), dane));
     }
 
 
 
     public void usunDane(int[] numeryWierszy) {
-        utworzWatek(new DBDeleteData(InformacjeOBazie.getConnection(), numeryWierszy));
+        SQLThreadQueue.dodajWatek(new DBDeleteData(InformacjeOBazie.getConnection(), numeryWierszy));
 
     }
 
     public void customSQLCommand(SQLConsole okno, String textCommand){
-        utworzWatek(new DBCustomSQLCommand(InformacjeOBazie.getConnection(), textCommand, okno));
+        SQLThreadQueue.dodajWatek(new DBCustomSQLCommand(InformacjeOBazie.getConnection(), textCommand, okno));
     }
 
     public void sortujDane(String by, String order) throws SQLException {
@@ -58,7 +64,7 @@ public class BazaDanych {
             statement = InformacjeOBazie.getConnection().createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT * FROM "+ InformacjeOBazie.getActiveTableName()+" ORDER BY " + by + " " + order + ";");
 
-            {
+
                 Row dodawanyRzad;
                 int liczbaKolumn = InformacjeOBazie.getActiveTableInfo().getLiczbaKolumn();
                 while (resultSet.next()) {
@@ -73,14 +79,16 @@ public class BazaDanych {
                                 dodawanyRzad.addPole(nazwaKolumny, resultSet.getString(nazwaKolumny));
                                 break;
                             default:
-                                break; //Mozna dodac informacje o bledzie
+                                log.error("Unknown data type encountered while trying to sort table: {}", InformacjeOBazie.getActiveTableInfo().getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.TYP_DANYCH_KOLUMNY));
+                                break;
                         }
                     }
                     dane.add(dodawanyRzad);
                 }
-            }
+                log.debug("Table {} sorted {} by {}", InformacjeOBazie.getActiveTableName(), order, by);
+
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error while attempting to show table {} sorted {} by {}", InformacjeOBazie.getActiveTableName(), order, by);
         } finally {
             assert statement != null;
             statement.close();
@@ -94,9 +102,7 @@ public class BazaDanych {
 
     }
 
-    private void utworzWatek(SQLRunnable runnable){
-        SQLThreadQueue.dodajWatek(runnable);
-    }
+
 
     public List<Row> getDane() {
         return dane;

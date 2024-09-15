@@ -1,14 +1,19 @@
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 public class DBUpdate implements Runnable{
+    private final Logger log = LoggerFactory.getLogger(DBUpdate.class);
     Connection connection;
     String query;
     DBUpdate(Connection connection) {
         this.connection=connection;
         query="SELECT * FROM " + InformacjeOBazie.getActiveTableName() + ";";
+        Thread.currentThread().setName("DBUpdateThread");
     }
 
     DBUpdate(Connection connection, String selectQuery){
@@ -39,12 +44,14 @@ public class DBUpdate implements Runnable{
                                 break;
                             default:
                                 dodawanyRzad.addPole(nazwaKolumny+" (type error)", null );
-                                break; //Mozna dodac informacje o bledzie
+                                log.error("Unknown data type encountered while trying to add data to table: {}", InformacjeOBazie.getActiveTableInfo().getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.TYP_DANYCH_KOLUMNY));
+                                break;
                         }
                     }
                     BazaDanych.getBazaDanych().getDane().add(dodawanyRzad);
                 }
             }
+            log.debug("Database data updated successfully. Table: {}", InformacjeOBazie.getActiveTableName());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {

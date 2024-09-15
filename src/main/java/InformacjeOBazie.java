@@ -1,10 +1,13 @@
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 public class InformacjeOBazie {
-
+private static final Logger log = LoggerFactory.getLogger(InformacjeOBazie.class);
     private static InformacjeOBazie informacjeOBazie;
 
     public static String getDatabaseName() {
@@ -43,21 +46,22 @@ public class InformacjeOBazie {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             connection = DriverManager.getConnection("jdbc:mysql://"+serverName+":"+port+"/" + databaseName, username, userPassword);
+            log.debug("Successfull connection with database: {}. (Servername: {}, Port: {})", databaseName, serverName, port);
             this.nazwaSerwera=serverName;
             this.port= port;
             this.nazwaBazy=databaseName;
             this.nazwaUzytkownika=username;
             this.hasloUzytkownika=userPassword;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Failed to connect with database: {}. (Servername: {}, Port: {})", databaseName, serverName, port);
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            log.error("Class not found error. Failed to connect with database: {}. (Servername: {}, Port: {})", databaseName, serverName, port);
         }
         try{
             updateTableNames();
             changeActiveTableInfo(nazwyTabel.get(0));
         }catch (SQLException e){
-            throw new RuntimeException(e);
+            log.error("Failed to update table names of the database");
         }
     }
 
@@ -84,15 +88,13 @@ public class InformacjeOBazie {
     public static void createDataBaseInfo(String serverName, String port, String databaseName, String username, String userPassword){
         informacjeOBazie=new InformacjeOBazie(serverName, port, databaseName, username, userPassword);
     }
-
-    public static InformacjeOBazie getInformacjeOBazie(){
-        return informacjeOBazie;
-    }
 }
 
 
 class InformacjeOTabeli {
 
+
+    private static final Logger log = LoggerFactory.getLogger(InformacjeOTabeli.class);
 
     enum InformacjeKolumny{
         NAZWA_KOLUMNY,
@@ -135,7 +137,7 @@ class InformacjeOTabeli {
             resultSet.next();
             kluczGlowny=resultSet.getString(1);
         }catch(SQLException e){
-            throw new RuntimeException(e);
+            log.error("Failed to establish primary key of the table: {}", nazwaTabeli);
         }finally {
             assert statement!=null;
             statement.close();
@@ -155,7 +157,7 @@ class InformacjeOTabeli {
                 listaKolumn.add(new Kolumna(resultSet.getString("COLUMN_NAME"),resultSet.getString("DATA_TYPE"), resultSet.getString("IS_NULLABLE")));
             }
         }catch(SQLException _){
-
+            log.error("Failed to establish table info of: {}", nazwaTabeli);
         }finally {
             assert statement!=null;
             statement.close();

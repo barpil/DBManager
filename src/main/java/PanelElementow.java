@@ -1,8 +1,12 @@
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 public class PanelElementow extends JScrollPane{
+    private static final Logger log = LoggerFactory.getLogger(PanelElementow.class);
     private static PanelElementow panelElementow;
     private static TabelaPodgladuBazyDanych tabelaPodgladuBazyDanych;
     static DefaultTableModel model = new DefaultTableModel(){
@@ -28,6 +32,7 @@ public class PanelElementow extends JScrollPane{
         tabelaPodgladuBazyDanych = new TabelaPodgladuBazyDanych();
         panelElementow.setViewportView(tabelaPodgladuBazyDanych);
         panelElementow.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        log.debug("Data table has been loaded");
 
     }
 

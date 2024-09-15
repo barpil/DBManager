@@ -1,3 +1,6 @@
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -8,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class SQLConsole extends JDialog {
+    private static final Logger log = LoggerFactory.getLogger(SQLConsole.class);
     private TabelaWyswietlaniaWynikow tabelaWyswietlaniaWynikow;
     SQLConsole(Frame frame, String nazwaOkna, boolean modal) {
         super(frame, nazwaOkna, modal);
@@ -158,6 +162,7 @@ public class SQLConsole extends JDialog {
 }
 
 class TabelaWyswietlaniaWynikow extends TabelaSQL{
+    private final Logger log = LoggerFactory.getLogger(TabelaWyswietlaniaWynikow.class);
     ResultSet resultSet=null;
     TabelaWyswietlaniaWynikow(boolean isCellEditable) {
         super(isCellEditable);
@@ -194,7 +199,7 @@ class TabelaWyswietlaniaWynikow extends TabelaSQL{
     }
 
     private Object[][] przygotujDaneTabeli() {
-        Object[][] wynik;
+        Object[][] wynik = null;
         try {
             List<Row> listaDanych = new LinkedList<>();
             Row dodawanyRzad;
@@ -215,7 +220,7 @@ class TabelaWyswietlaniaWynikow extends TabelaSQL{
                             break;
                         default:
                             dodawanyRzad.addPole(nazwaKolumny + " (type error)", null);
-                            System.out.println(resultSet.getMetaData().getColumnTypeName(i+1));
+                            log.error("Unknown data type encountered while trying to add data to table: {}", resultSet.getMetaData().getColumnTypeName(i+1).toLowerCase());
                             break; //Mozna dodac informacje o bledzie
                     }
 
@@ -232,7 +237,7 @@ class TabelaWyswietlaniaWynikow extends TabelaSQL{
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Failed to prepare table data");
         }
         resultSet=null;
         return wynik;
