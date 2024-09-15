@@ -1,13 +1,13 @@
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactoryFriend;
+
+import java.sql.*;
+import java.util.*;
 
 public class BazaDanych {
     private static BazaDanych bazaDanych;
+    private final Logger log = LoggerFactory.getLogger(BazaDanych.class);
 
     /*
         nazwaSerwera: localhost
@@ -19,155 +19,76 @@ public class BazaDanych {
         tabele: users, lista
      */
 
-
-    private String nazwaBazy;
-    private final String nazwaSerwera;
-    private final String port;
-    private String nazwaTabeli;
-    private String nazwaUzytkownika;
-    private String hasloUzytkownika;
-    private List<Row> dane = new LinkedList<>();
-    private final java.sql.Connection connection;
-
-    private InformacjeOTabeli informacjeOTabeli;
+    private final List<Row> dane = new LinkedList<>();
 
     private BazaDanych(String nazwaSerwera, String port, String nazwaBazy, String nazwaUzytkownika, String hasloUzytkownika) throws SQLException {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            //Klasa Connection odpowiada za polaczenie z baza danych
-            connection = DriverManager.getConnection("jdbc:mysql://"+nazwaSerwera+":"+port+"/" + nazwaBazy, nazwaUzytkownika, hasloUzytkownika);
-            this.nazwaSerwera = nazwaSerwera;
-            this.port = port;
-            this.nazwaBazy = nazwaBazy;
-            this.nazwaUzytkownika = nazwaUzytkownika;
-            this.hasloUzytkownika = hasloUzytkownika;
-
-        }catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        log.debug("Database changed to {} [Servername:{}, Port:{}]",nazwaBazy,nazwaSerwera,port);
+        InformacjeOBazie.createDataBaseInfo(nazwaSerwera, port, nazwaBazy, nazwaUzytkownika, hasloUzytkownika);
     }
 
     public static BazaDanych getBazaDanych() {
-//        if (bazaDanych == null) {
-//            bazaDanych = new BazaDanych();
-//        }
         return bazaDanych;
     }
 
-    public void zaktualizujBaze() throws SQLException {
-        Statement statement = null;
-        dane.clear();
+    synchronized public void zaktualizujBaze() {
+        Thread thread = new Thread(new DBUpdate(InformacjeOBazie.getConnection()));
+        thread.start();
         try {
-            statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + nazwaTabeli + ";");
-            informacjeOTabeli = new InformacjeOTabeli(connection);
-            {
-                Row dodawanyRzad;
-                int liczbaKolumn = informacjeOTabeli.getLiczbaKolumn();
-                while (resultSet.next()) {
-                    dodawanyRzad = new Row(liczbaKolumn);
-                    for (int i = 0; i < liczbaKolumn; i++) {
-                        String nazwaKolumny = informacjeOTabeli.getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY);
-                        switch (informacjeOTabeli.getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.TYP_DANYCH_KOLUMNY)) {
-                            case "int":
-                                dodawanyRzad.addPole(nazwaKolumny, Integer.parseInt(resultSet.getString(nazwaKolumny)));
-                                break;
-                            case "varchar":
-                                dodawanyRzad.addPole(nazwaKolumny, resultSet.getString(nazwaKolumny));
-                                break;
-                            default:
-                                dodawanyRzad.addPole(nazwaKolumny+" (type error)", null );
-                                break; //Mozna dodac informacje o bledzie
-                        }
-                    }
-                    dane.add(dodawanyRzad);
-                }
-            }
-        } catch (SQLException e) {
+            thread.join();
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
-        } finally {
-            assert statement != null;
-            statement.close();
         }
+
 
     }
 
-    public void dodajDane(int id, String nazwa) throws SQLException { //Trzeba bedzie wymyslic inny mechanizm dodawania danych ktory bedzie mozliwy do korzystania dla dowolnej bazy
-        Statement statement = null;
-        try {
-            statement = connection.createStatement();
-            String insertQuery = "INSERT INTO users(idusers, nazwa)\n" +
-                    "VALUES (" + id + ",'" + nazwa + "');";
-            statement.execute(insertQuery);
-        } catch (SQLException e) {
-            throw new RuntimeException();
-        } finally {
-            assert statement != null;
-            statement.close();
-        }
-        zaktualizujBaze();
+    public void dodajDane(List<Row> dane) {
+        SQLThreadQueue.dodajWatek(new DBAddData(InformacjeOBazie.getConnection(), dane));
     }
 
-    public void usunDane(int id) throws SQLException { //Tez bedzie trzeba dostosowac dla dowolnej bazy
-        Statement statement = null;
-        try {
-            statement = connection.createStatement();
-            String deleteQuery = "DELETE FROM users WHERE idusers='" + id + "';";
-            statement.execute(deleteQuery);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            assert statement != null;
-            statement.close();
-        }
-        zaktualizujBaze();
+
+
+    public void usunDane(int[] numeryWierszy) {
+        SQLThreadQueue.dodajWatek(new DBDeleteData(InformacjeOBazie.getConnection(), numeryWierszy));
+
     }
 
-    public void usunDane(String nazwa) throws SQLException { //Tez bedzie trzeba dostosowac do dowolnej bazy
-        Statement statement = null;
-        try {
-            statement = connection.createStatement();
-            String deleteQuery = "DELETE FROM users WHERE nazwa='" + nazwa + "';";
-            statement.execute(deleteQuery);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            assert statement != null;
-            statement.close();
-        }
-        zaktualizujBaze();
+    public void customSQLCommand(SQLConsole okno, String textCommand){
+        SQLThreadQueue.dodajWatek(new DBCustomSQLCommand(InformacjeOBazie.getConnection(), textCommand, okno));
     }
 
     public void sortujDane(String by, String order) throws SQLException {
         Statement statement = null;
         dane.clear();
         try {
-            statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM "+ nazwaTabeli+" ORDER BY " + by + " " + order + ";");
-            informacjeOTabeli = new InformacjeOTabeli(connection);
-            {
+            statement = InformacjeOBazie.getConnection().createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM "+ InformacjeOBazie.getActiveTableName()+" ORDER BY " + by + " " + order + ";");
+
+
                 Row dodawanyRzad;
-                int liczbaKolumn = informacjeOTabeli.getLiczbaKolumn();
+                int liczbaKolumn = InformacjeOBazie.getActiveTableInfo().getLiczbaKolumn();
                 while (resultSet.next()) {
                     dodawanyRzad = new Row(liczbaKolumn);
                     for (int i = 0; i < liczbaKolumn; i++) {
-                        String nazwaKolumny = informacjeOTabeli.getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY);
-                        switch (informacjeOTabeli.getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.TYP_DANYCH_KOLUMNY)) {
+                        String nazwaKolumny = InformacjeOBazie.getActiveTableInfo().getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY);
+                        switch (InformacjeOBazie.getActiveTableInfo().getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.TYP_DANYCH_KOLUMNY)) {
                             case "int":
-                                dodawanyRzad.addPole(nazwaKolumny, Integer.parseInt(resultSet.getString(nazwaKolumny)));
+                                dodawanyRzad.addPole(nazwaKolumny, resultSet.getInt(nazwaKolumny));
                                 break;
                             case "varchar":
                                 dodawanyRzad.addPole(nazwaKolumny, resultSet.getString(nazwaKolumny));
                                 break;
                             default:
-                                break; //Mozna dodac informacje o bledzie
+                                log.error("Unknown data type encountered while trying to sort table: {}", InformacjeOBazie.getActiveTableInfo().getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.TYP_DANYCH_KOLUMNY));
+                                break;
                         }
                     }
                     dane.add(dodawanyRzad);
                 }
-            }
+                log.debug("Table {} sorted {} by {}", InformacjeOBazie.getActiveTableName(), order, by);
+
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error while attempting to show table {} sorted {} by {}", InformacjeOBazie.getActiveTableName(), order, by);
         } finally {
             assert statement != null;
             statement.close();
@@ -175,36 +96,20 @@ public class BazaDanych {
 
     }
 
-    public void zaktualizujID() {
 
-        Statement statement = null;
-        try {
-            zaktualizujBaze();
-            statement = connection.createStatement();
-            String kluczGlowny = informacjeOTabeli.getKluczGlowny();
-            for (int nr = 1; nr < getDane().size() + 1; nr++) {
-                if (nr != (int) getDane().get(nr - 1).getPole(0).getWartosc()) {
-                    String updateIDQuery = "UPDATE USERS SET " + kluczGlowny + " = " + nr + " WHERE " + kluczGlowny + " = " + getDane().get(nr - 1).getPole(0).getWartosc() + ";";
-                    statement.execute(updateIDQuery);
-                }
-            }
-            zaktualizujBaze();
-            PanelElementow.getPanelElementow().updateModel();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static void ustawBaze(String nazwaSerwera, String port, String nazwaBazy, String nazwaUzytkownika, String hasloUzytkownika) throws SQLException {
+    public static void changeDatabase(String nazwaSerwera, String port, String nazwaBazy, String nazwaUzytkownika, String hasloUzytkownika) throws SQLException {
         bazaDanych = new BazaDanych(nazwaSerwera, port, nazwaBazy, nazwaUzytkownika, hasloUzytkownika);
+
     }
+
+
 
     public List<Row> getDane() {
         return dane;
     }
 
     public Object[][] getData() {
-        int liczbaKolumn = getInformacjeOTabeli().getLiczbaKolumn();
+        int liczbaKolumn = InformacjeOBazie.getActiveTableInfo().getLiczbaKolumn();
         Object[][] obj = new Object[getDane().size()][liczbaKolumn];
         for (int i = 0; i < getDane().size(); i++) {
             for(int j=0;j<liczbaKolumn;j++){
@@ -215,33 +120,12 @@ public class BazaDanych {
         return obj;
     }
 
-    public List<String> getNazwyTabel() throws SQLException {
-        List<String> tabele = new ArrayList<>(0);
-        Statement statement = connection.createStatement();
-        String getTablesQueries = "SHOW TABLES;";
-
-        ResultSet resultSet = statement.executeQuery(getTablesQueries);
-        while(resultSet.next()){
-            String nazwa = resultSet.getString(1);
-            tabele.add(nazwa);
-
-        }
-        return tabele;
-    }
-
-    public InformacjeOTabeli getInformacjeOTabeli() {return informacjeOTabeli;}
-
-    public String getNazwaBazy() {return nazwaBazy;}
-    public String getNazwaTabeli() {return nazwaTabeli;}
-    public void setNazwaBazy(String nazwaBazy) {this.nazwaBazy = nazwaBazy;}
-    public void setNazwaTabeli(String nazwaTabeli) {this.nazwaTabeli = nazwaTabeli;}
-    public void setNazwaUzytkownika(String nazwaUzytkownika) {this.nazwaUzytkownika = nazwaUzytkownika;}
-    public void setHasloUzytkownika(String hasloUzytkownika) {this.hasloUzytkownika = hasloUzytkownika;}
+    public void changeTable(String nazwaTabeli) {InformacjeOBazie.changeActiveTableInfo(nazwaTabeli);}
 
 
 }
 
-class Row {
+class Row implements Iterable<Pole<?>>{
 
 
     List<Pole<?>> listaPol;
@@ -269,9 +153,9 @@ class Row {
         return listaPol.get(nrKolumny);
     }
 
-    public Pole getPole(String nazwaKolumny) {
+    public Pole<?> getPole(String nazwaKolumny) {
         for (Pole<?> pole : listaPol) {
-            if (pole.getNazwaKolumny() == nazwaKolumny) return pole;
+            if (pole.getNazwaKolumny().equals(nazwaKolumny)) return pole;
         }
         return null;
     }
@@ -282,6 +166,28 @@ class Row {
 
     public <T> void addPole(String nazwaKolumny, T wartosc) {
         listaPol.add(new Pole<>(nazwaKolumny, wartosc));
+    }
+
+    @Override
+    public Iterator<Pole<?>> iterator() {
+        return new MyIterator();
+    }
+
+    private class MyIterator implements Iterator<Pole<?>>{
+        private int index = 0;
+        @Override
+        public boolean hasNext() {
+            return index<Row.this.listaPol.size();
+        }
+
+        @Override
+        public Pole<?> next() {
+            if(hasNext()){
+                return Row.this.listaPol.get(index++);
+            }else{
+                throw new NoSuchElementException();
+            }
+        }
     }
 }
 
@@ -302,5 +208,9 @@ class Pole<T> {
         return wartosc;
     }
 
+    @Override
+    public String toString(){
+        return "["+nazwaKolumny+":"+wartosc+"]";
+    }
 
 }

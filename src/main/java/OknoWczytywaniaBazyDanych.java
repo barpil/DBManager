@@ -1,4 +1,6 @@
 import com.mysql.cj.jdbc.exceptions.CommunicationsException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,6 +15,15 @@ public class OknoWczytywaniaBazyDanych extends JDialog {
     private static String nazwaUzytkownika;
     JPanel panelWewnetrzny;
     private OknoWczytywaniaBazyDanych(){
+        if(ConfigFileOperator.isAutologinEnabled()){
+            ConfigFileOperator.AutologinProperties autologinProperties = ConfigFileOperator.getAutologinProperties();
+            assert autologinProperties != null;
+            loadDatabase(autologinProperties.serverName(), autologinProperties.port(),autologinProperties.databaseName(),autologinProperties.username(), autologinProperties.password());
+            ConfigFileOperator.autoLoginAlreadyPerformed();
+
+
+            return;
+        }
         this.setModalityType(ModalityType.APPLICATION_MODAL);
         this.setSize(new Dimension(270,310));
         this.setLocationRelativeTo(OknoGlowne.getOknoGlowne());
@@ -36,7 +47,6 @@ public class OknoWczytywaniaBazyDanych extends JDialog {
 
         JPanel liniaIP = new JPanel(new FlowLayout(FlowLayout.LEFT, 10,5));
         liniaIP.setPreferredSize(liniaWprowadzaniaDimension);
-        liniaIP.setBackground(Color.blue);
         liniaIP.add(new Label("   Server name/IP:"));
         JTextField liniaIPTB = new JTextField();
         liniaIPTB.setPreferredSize(new Dimension(120,30));
@@ -45,7 +55,6 @@ public class OknoWczytywaniaBazyDanych extends JDialog {
 
         JPanel liniaPort = new JPanel(new FlowLayout(FlowLayout.LEFT, 10,5));
         liniaPort.setPreferredSize(liniaWprowadzaniaDimension);
-        liniaPort.setBackground(Color.green);
         liniaPort.add(new Label("                    Port:"));
         JTextField liniaPortTB = new JTextField();
         liniaPortTB.setPreferredSize(new Dimension(120,30));
@@ -54,7 +63,6 @@ public class OknoWczytywaniaBazyDanych extends JDialog {
 
         JPanel liniaNazwaBazy = new JPanel(new FlowLayout(FlowLayout.LEFT, 10,5));
         liniaNazwaBazy.setPreferredSize(liniaWprowadzaniaDimension);
-        liniaNazwaBazy.setBackground(Color.red);
         liniaNazwaBazy.add(new Label("  Database name:"));
         JTextField liniaNazwaBazyTB = new JTextField();
         liniaNazwaBazyTB.setPreferredSize(new Dimension(120,30));
@@ -83,27 +91,8 @@ public class OknoWczytywaniaBazyDanych extends JDialog {
         Button loadButton = new Button("Load");
         loadButton.setPreferredSize(new Dimension(70,20));
         loadButton.addActionListener(e -> {
-
-            try {
-                BazaDanych.ustawBaze(liniaIPTB.getText(), liniaPortTB.getText(), liniaNazwaBazyTB.getText(), liniaNazwyUzytkownikaTB.getText(), liniaHaslaUzytkownikaTB.getText());
-                //Przypisanie w tej kolejności bo jeżeli ktoś nie poda poprawnych danych logowania to nie chcemy ich zapamietywac
-                nazwaSerwera = liniaIPTB.getText();
-                port = liniaPortTB.getText();
-                nazwaBazy = liniaNazwaBazyTB.getText();
-                nazwaUzytkownika = liniaNazwyUzytkownikaTB.getText();
-
-                PanelSterowania.getPanelSterowania().zaktualizujWyborTabelCB();
-                this.dispose();
-            }
-            catch( SQLSyntaxErrorException ex){
-                JOptionPane.showMessageDialog(this,"An incorrect database name has been entered!", "Invalid database error", JOptionPane.ERROR_MESSAGE);
-            }
-            catch(CommunicationsException ex){
-                JOptionPane.showMessageDialog(this,"An unknown server name or port has been entered!", "Invalid server error", JOptionPane.ERROR_MESSAGE);
-            }
-            catch (SQLException ex) {
-                JOptionPane.showMessageDialog(this,"An incorrect login data has been provided!", "Invalid login error", JOptionPane.ERROR_MESSAGE);
-            }
+            loadDatabase(liniaIPTB.getText(), liniaPortTB.getText(),liniaNazwaBazyTB.getText(), liniaNazwyUzytkownikaTB.getText(), liniaHaslaUzytkownikaTB.getText());
+            this.dispose();
         });
         liniaPrzyciskow.add(loadButton);
         Button declineButton = new Button("Decline");
@@ -122,7 +111,42 @@ public class OknoWczytywaniaBazyDanych extends JDialog {
         this.add(liniaPrzyciskow);
 
     }
+    private void loadDatabase(String serverName, String portNumber, String databaseName, String username, String password){
+        try {
+            BazaDanych.changeDatabase(serverName, portNumber, databaseName, username, password);
+            nazwaSerwera = serverName;
+            port = portNumber;
+            nazwaBazy = databaseName;
+            nazwaUzytkownika = username;
 
+            Menu.getMenu().dodajOpcjeBazyDanych();
+            BazaDanych.getBazaDanych().zaktualizujBaze();
+            PanelElementow.zaladujTabele();
+
+
+        }
+        catch( SQLSyntaxErrorException ex){
+            String message = "";
+            if(ConfigFileOperator.isAutologinEnabled()){
+                message+="Autologin Error: ";
+            }
+            JOptionPane.showMessageDialog(this,message+"An incorrect database name has been entered!", "Invalid database error", JOptionPane.ERROR_MESSAGE);
+        }
+        catch(CommunicationsException ex){
+            String message = "";
+            if(ConfigFileOperator.isAutologinEnabled()){
+                message+="Autologin Error: ";
+            }
+            JOptionPane.showMessageDialog(this,message+"An unknown server name or port has been entered!", "Invalid server error", JOptionPane.ERROR_MESSAGE);
+        }
+        catch (SQLException ex) {
+            String message = "";
+            if(ConfigFileOperator.isAutologinEnabled()){
+                message+="Autologin Error: ";
+            }
+            JOptionPane.showMessageDialog(this,message+"An incorrect login data has been provided!", "Invalid login error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
     public static void showOknoWczytywania(){
         oknoWczytywaniaBazyDanych= new OknoWczytywaniaBazyDanych();
     }

@@ -14,7 +14,7 @@ public class Menu extends JMenuBar {
 
     private void dodajComponenty() {
         menuGlowne.removeAll();
-        JMenuItem wczytajBazeDanychMI = new JMenuItem("Wczytaj bazę danych");
+        JMenuItem wczytajBazeDanychMI = new JMenuItem("Load database");
         wczytajBazeDanychMI.addActionListener(e -> OknoWczytywaniaBazyDanych.showOknoWczytywania());
         menuGlowne.add(wczytajBazeDanychMI);
 
@@ -24,26 +24,41 @@ public class Menu extends JMenuBar {
 
     }
 
+
+
     public void dodajOpcjeBazyDanych() {
-        JMenuItem zaktualizujIdMI = new JMenuItem("Zaktualizuj ID");
-        zaktualizujIdMI.addActionListener(e -> BazaDanych.getBazaDanych().zaktualizujID());
-        menuGlowne.add(zaktualizujIdMI);
-        JMenu sortujWyniki = new JMenu("Sortuj...");
+        JMenu wybierzTabeleMenu = new JMenu("Select table");
+        List<String> listaTabel = InformacjeOBazie.getTableNames();
+        for(String nazwaTabeli: listaTabel){
+            JMenuItem nazwaTabeliMI = new JMenuItem(nazwaTabeli);
+            nazwaTabeliMI.addActionListener(e -> {
+                BazaDanych.getBazaDanych().changeTable(nazwaTabeli);
+                BazaDanych.getBazaDanych().zaktualizujBaze();
+                PanelElementow.zaladujTabele();
+                zaktualizujMenu();
+            });
+            wybierzTabeleMenu.add(nazwaTabeliMI);
+        }
+        menuGlowne.add(wybierzTabeleMenu);
+        JMenuItem edytujTabeleMI = new JMenuItem("Edit table");
+        edytujTabeleMI.addActionListener(e -> edytujTabele());
+        JMenuItem sqlConsoleMI = new JMenuItem("SQL console");
+        sqlConsoleMI.addActionListener(e -> otworzKonsoleSQL());
+        menuGlowne.add(edytujTabeleMI);
+        JMenu sortujWyniki = new JMenu("Sort...");
         menuGlowne.add(sortujWyniki);
+        menuGlowne.add(sqlConsoleMI);
         JMenu sortujASC = new JMenu("ASC");
         JMenu sortujDESC = new JMenu("DESC");
         sortujWyniki.add(sortujASC);
         sortujWyniki.add(sortujDESC);
-
-        InformacjeOTabeli informacjeOTabeli = BazaDanych.getBazaDanych().getInformacjeOTabeli();
-
-        List<String> listaKolumn = informacjeOTabeli.getInformacjaOKolumnie(InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY);
+        List<String> listaKolumn = InformacjeOBazie.getActiveTableInfo().getInformacjaOKolumnie(InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY);
         for(String nazwaKolumny: listaKolumn){
             JMenuItem przyciskKolumnyASC = new JMenuItem(nazwaKolumny);
             przyciskKolumnyASC.addActionListener(e -> {
                 try {
                     BazaDanych.getBazaDanych().sortujDane(nazwaKolumny,"ASC");
-                    PanelElementow.getPanelElementow().updateModel();
+                    PanelElementow.zaladujTabele();
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);
                 }
@@ -52,7 +67,7 @@ public class Menu extends JMenuBar {
             przyciskKolumnyDESC.addActionListener(e -> {
                 try {
                     BazaDanych.getBazaDanych().sortujDane(nazwaKolumny,"DESC");
-                    PanelElementow.getPanelElementow().updateModel();
+                    PanelElementow.zaladujTabele();
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);
                 }
@@ -61,6 +76,16 @@ public class Menu extends JMenuBar {
             sortujDESC.add(przyciskKolumnyDESC);
 
         }
+    }
+
+    private void otworzKonsoleSQL() {
+        new SQLConsole(OknoGlowne.getOknoGlowne(), "SQL console", false);
+    }
+
+    private void edytujTabele() {
+        new OknoEdycjiTabeli(OknoGlowne.getOknoGlowne(), "Edytuj tabelę", true);
+        BazaDanych.getBazaDanych().zaktualizujBaze();
+        PanelElementow.zaladujTabele();
     }
 
     public static Menu getMenu() {

@@ -1,10 +1,14 @@
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 public class PanelElementow extends JScrollPane{
+    private static final Logger log = LoggerFactory.getLogger(PanelElementow.class);
     private static PanelElementow panelElementow;
-    private static JTable jTable;
+    private static TabelaPodgladuBazyDanych tabelaPodgladuBazyDanych;
     static DefaultTableModel model = new DefaultTableModel(){
         @Override
         public boolean isCellEditable(int row, int column) {
@@ -12,47 +16,26 @@ public class PanelElementow extends JScrollPane{
         }
     };
     private PanelElementow() {
-        this.setPreferredSize(new Dimension(350, 500));
-        this.setBackground(Color.GREEN);
-        utworzElementy();
+        this.setPreferredSize(new Dimension(500, 500));
         if(BazaDanych.getBazaDanych()!=null){
             zaladujTabele();
+            panelElementow.setViewportView(tabelaPodgladuBazyDanych);
+            panelElementow.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         }
 
 
 
     }
 
-    private void utworzElementy() {
-
-    }
 
     public static void zaladujTabele(){
-        int liczbaKolumn = BazaDanych.getBazaDanych().getInformacjeOTabeli().getLiczbaKolumn();
-        String nazwyKolumn[] = new String[liczbaKolumn];
-        int i=0;
-        for(String nazwaKolumny: BazaDanych.getBazaDanych().getInformacjeOTabeli().getInformacjaOKolumnie(InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY)){
-            nazwyKolumn[i]=nazwaKolumny;
-            i++;
-        }
-        model.setDataVector(BazaDanych.getBazaDanych().getData(), nazwyKolumn);
-        jTable = new JTable(model);
-        panelElementow.setViewportView(jTable);
+        tabelaPodgladuBazyDanych = new TabelaPodgladuBazyDanych();
+        panelElementow.setViewportView(tabelaPodgladuBazyDanych);
         panelElementow.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        log.debug("Data table has been loaded");
 
     }
 
-    public void updateModel() {
-        int liczbaKolumn = BazaDanych.getBazaDanych().getInformacjeOTabeli().getLiczbaKolumn();
-        String nazwyKolumn[] = new String[liczbaKolumn];
-        int i=0;
-        for(String nazwaKolumny: BazaDanych.getBazaDanych().getInformacjeOTabeli().getInformacjaOKolumnie(InformacjeOTabeli.InformacjeKolumny.NAZWA_KOLUMNY)){
-            nazwyKolumn[i]=nazwaKolumny;
-            i++;
-        }
-        model.setDataVector(BazaDanych.getBazaDanych().getData(), nazwyKolumn );
-        jTable.setModel(model);
-    }
 
     public static PanelElementow getPanelElementow() {
         if(panelElementow==null){
