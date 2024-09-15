@@ -41,7 +41,8 @@ public class ConfigFileOperator {
                 czyZaladowane=true;
                 properties.load(configFileReader);
             } catch (IOException e) {
-                JOptionPane.showMessageDialog(OknoGlowne.getOknoGlowne(),"Unable to load the configuration file. Please ensure that the file exists and is accessible.", "Config file error", JOptionPane.ERROR_MESSAGE);
+                String sciezkaDoConfigFile=ConfigFileOperator.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+                JOptionPane.showMessageDialog(OknoGlowne.getOknoGlowne(),"Unable to load the configuration file at path: "+sciezkaDoConfigFile.substring(0,sciezkaDoConfigFile.lastIndexOf('/'))+". Please ensure that the file exists and is accessible.", "Config file error", JOptionPane.ERROR_MESSAGE);
                 log.error("Config file error, Unable to load the configuration file");
                 OknoGlowne.getOknoGlowne().dispose();
                 System.exit(1);

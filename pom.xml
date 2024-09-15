@@ -29,7 +29,6 @@
             <type>maven-plugin</type>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-shade-plugin -->
         <dependency>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-shade-plugin</artifactId>
@@ -39,7 +38,7 @@
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf</artifactId>
-            <version>3.2</version> <!-- Upewnij się, że używasz najnowszej wersji FlatLaf -->
+            <version>3.2</version>
         </dependency>
 
         <dependency>

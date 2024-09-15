@@ -47,7 +47,6 @@ public class OknoWczytywaniaBazyDanych extends JDialog {
 
         JPanel liniaIP = new JPanel(new FlowLayout(FlowLayout.LEFT, 10,5));
         liniaIP.setPreferredSize(liniaWprowadzaniaDimension);
-        liniaIP.setBackground(Color.blue);
         liniaIP.add(new Label("   Server name/IP:"));
         JTextField liniaIPTB = new JTextField();
         liniaIPTB.setPreferredSize(new Dimension(120,30));
@@ -56,7 +55,6 @@ public class OknoWczytywaniaBazyDanych extends JDialog {
 
         JPanel liniaPort = new JPanel(new FlowLayout(FlowLayout.LEFT, 10,5));
         liniaPort.setPreferredSize(liniaWprowadzaniaDimension);
-        liniaPort.setBackground(Color.green);
         liniaPort.add(new Label("                    Port:"));
         JTextField liniaPortTB = new JTextField();
         liniaPortTB.setPreferredSize(new Dimension(120,30));
@@ -65,7 +63,6 @@ public class OknoWczytywaniaBazyDanych extends JDialog {
 
         JPanel liniaNazwaBazy = new JPanel(new FlowLayout(FlowLayout.LEFT, 10,5));
         liniaNazwaBazy.setPreferredSize(liniaWprowadzaniaDimension);
-        liniaNazwaBazy.setBackground(Color.red);
         liniaNazwaBazy.add(new Label("  Database name:"));
         JTextField liniaNazwaBazyTB = new JTextField();
         liniaNazwaBazyTB.setPreferredSize(new Dimension(120,30));

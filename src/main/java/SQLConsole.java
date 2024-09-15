@@ -218,6 +218,21 @@ class TabelaWyswietlaniaWynikow extends TabelaSQL{
                         case "varchar":
                             dodawanyRzad.addPole(nazwaKolumny, resultSet.getString(nazwaKolumny));
                             break;
+                        case "date":
+                            dodawanyRzad.addPole(nazwaKolumny, resultSet.getDate(nazwaKolumny));
+                            break;
+                        case "decimal":
+                            dodawanyRzad.addPole(nazwaKolumny, resultSet.getBigDecimal(nazwaKolumny));
+                            break;
+                        case "bit":
+                            dodawanyRzad.addPole(nazwaKolumny, resultSet.getShort(nazwaKolumny));
+                            break;
+                        case "boolean":
+                            dodawanyRzad.addPole(nazwaKolumny, resultSet.getBoolean(nazwaKolumny));
+                            break;
+                        case "time":
+                            dodawanyRzad.addPole(nazwaKolumny, resultSet.getTime(nazwaKolumny));
+                            break;
                         default:
                             dodawanyRzad.addPole(nazwaKolumny + " (type error)", null);
                             log.error("Unknown data type encountered while trying to add data to table: {}", resultSet.getMetaData().getColumnTypeName(i+1).toLowerCase());

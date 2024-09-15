@@ -45,12 +45,13 @@ public class DBAddData implements SQLRunnable{
                 insertCommand+=" (";
                 for(int numerKolumny=0;numerKolumny<liczbaKolumn;numerKolumny++){
                     switch (InformacjeOBazie.getActiveTableInfo().getInformacjaOKolumnie(numerKolumny, InformacjeOTabeli.InformacjeKolumny.TYP_DANYCH_KOLUMNY)){
-                        case "int":
+                        case "int", "bit", "decimal":
                             insertCommand+=dodawaneDane.get(numerWiersza).getPole(numerKolumny).getWartosc();
                             break;
-                        case "varchar":
+                        case "varchar", "date", "boolean", "time":
                             insertCommand+="'"+dodawaneDane.get(numerWiersza).getPole(numerKolumny).getWartosc()+"'";
                             break;
+
                         default:
                             log.error("Unknown data type encountered while trying to add data to table: {}", InformacjeOBazie.getActiveTableInfo().getInformacjaOKolumnie(numerKolumny, InformacjeOTabeli.InformacjeKolumny.TYP_DANYCH_KOLUMNY));
                     }

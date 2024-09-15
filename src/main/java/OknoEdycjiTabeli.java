@@ -84,6 +84,8 @@ public class OknoEdycjiTabeli extends JDialog {
             TabelaDodawaniaWierszy() {
                 super(true);
                 this.getTableHeader().setReorderingAllowed(false);
+                this.setRowSelectionAllowed(false);
+                this.setFocusable(true);
             }
 
             @Override
@@ -122,7 +124,7 @@ public class OknoEdycjiTabeli extends JDialog {
 
                 List<Integer> listaNiewypelnionych = new LinkedList<>();
                 for(int i=0;i<dodawanyWiersz.listaPol.size();i++){
-                    if(InformacjeOBazie.getActiveTableInfo().getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.IS_NULLABLE).equals("NO") && dodawanyWiersz.getPole(i).getWartosc()==null){
+                    if(InformacjeOBazie.getActiveTableInfo().getInformacjaOKolumnie(i, InformacjeOTabeli.InformacjeKolumny.IS_NULLABLE).equals("NO") && (dodawanyWiersz.getPole(i).getWartosc()==null || dodawanyWiersz.getPole(i).getWartosc().equals(""))){
                         listaNiewypelnionych.add(i);
                     }
                 }
