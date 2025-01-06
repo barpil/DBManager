@@ -1,24 +1,26 @@
-# Mini projekt Edytor Baz Danych Java:
-### Czego ma mnie nauczyć ten projekt?
-- Obsługa baz danych w Javie
-- Poszerzenie wiedzy o elementach biblioteki Swing
-- Refaktoryzacja kodu
-### Co ma zawierać projekt?
-Zrobić aplikację okienkową, która pozwoli na:
-- [x] Wpisywanie nazwy gracza i zapisanie go do bazy danych jeśli jeszcze w niej nie jest
-- [x] Usunięcie z bazy gracza o danej nazwie, jeśli istnieje
-- [x] Wyświetlenie w okienku wszystkich graczy w bazie
-- [x] Możliwość kliknięcia gracza z wyświetlonej listy i usunięcie go po wciśnięciu odpowiedniego przycisku
-- [x] Możliwość edycji tabeli poprzez JTable
-- [x] Dostosowanie aplikacji do dowolnej wczytanej bazy danych
-- [x] Możliwość wczytania dowolnej bazy danych
-- [x] Możliwość wpisania dowolnego polecenia SQL
-- [x] Dodanie loggera błędów
-- [ ] Dostosowanie aplikacji do baz innych niż MySql
-- [x] Refaktoryzacja kodu
+# Database editor project
+Project of a database editor window app.  
+Program allows working with databases containing data of simple types (like String, int) which list can be further extended.  
+Program at this moment works only with mySQL databases however list of compatible can also be further extended.
 
-### Pomysły co dodać do projektu:
-- [ ] Zaznaczanie, które kolumny tabeli mają nam być pokazywane
+#### How to run it?
+In order to run the app double-click DBManager jar file.  
+*Note that config file must be present in the same folder as DBManager jar file!*
 
-### Co koniecznie trzeba zmienić:
-- Jest błąd z sortowaniem danych innego typu niż String i int.
+
+#### Program features:  
+1. Opening any database of compatible environment
+2. Presenting content of tables of specified database with use of JTable
+3. Dropdown menu including options like:
+     - Changing used database
+     - Selecting any table of used database
+     - Editing chosen table (adding/deleting rows of tables in database)
+     - Displaying the table in ascending/descending order of the selected column
+     - SQL console in which user can write SQL commands and see their results (in case of SELECT commands)
+4. Config file specifing database autologin
+
+
+
+#### What was used in this project?
+1. JDBC with mySQL driver for database communication
+2. Swing library for GUI
